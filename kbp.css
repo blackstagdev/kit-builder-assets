@@ -1,0 +1,20 @@
+/* Kit Builder basic UI */
+#kbp-app{max-width:1100px;margin:20px auto;padding:0 16px;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
+#kbp-counter{margin:10px 0;font-weight:800;color:#444}
+#kbp-products{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+@media(max-width:700px){#kbp-products{grid-template-columns:1fr}}
+
+.kbp-item{border:2px solid #e6e6e6;border-radius:12px;padding:12px;cursor:pointer;text-align:left;background:#fff;display:flex;gap:10px;align-items:flex-start}
+.kbp-item:hover{border-color:#bcd6ff}
+.kbp-item.on{border-color:#1f67d2;background:#eef5ff}
+.kbp-item:disabled{opacity:.55;cursor:not-allowed}
+
+.kbp-box{width:18px;height:18px;border:2px solid #bbb;border-radius:4px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;margin-top:2px}
+.kbp-item.on .kbp-box{border-color:#1f67d2;background:#1f67d2;color:#fff}
+
+.kbp-name{font-weight:900}
+.kbp-sku{font-size:12px;color:#666;margin-top:2px;min-height:16px}
+
+#kbp-add{border:none;border-radius:12px;padding:12px 14px;font-weight:900;background:#1f67d2;color:#fff;cursor:pointer}
+#kbp-add:disabled{background:#cfcfcf;cursor:not-allowed}
+#kbp-msg{margin-top:10px;font-weight:800;color:#b00020}
