@@ -332,7 +332,6 @@
 })();
 
 (function () {
-  // Only run on cart/checkout pages
   const isCartLike =
     document.body.classList.contains("woocommerce-cart") ||
     document.body.classList.contains("woocommerce-checkout") ||
@@ -342,62 +341,67 @@
   if (!isCartLike) return;
 
   async function fetchCart() {
-    // Woo Store API (Blocks)
     const res = await fetch("/wp-json/wc/store/v1/cart", { credentials: "same-origin" });
     if (!res.ok) return null;
     return res.json();
   }
 
-  function hideChildControls(childNames) {
+  function applyToRows(childIdsSet) {
     const rows = document.querySelectorAll(".wc-block-cart-items__row");
     rows.forEach((row) => {
-      const nameEl = row.querySelector(".wc-block-components-product-name");
-      if (!nameEl) return;
+      const link = row.querySelector('a.wc-block-components-product-name');
+      if (!link) return;
 
-      const name = (nameEl.textContent || "").trim();
-      if (!childNames.has(name)) return;
+      // Product links look like ...?p=30501 or /product/slug/
+      // Store API gives us the numeric ID; Blocks DOM doesn't.
+      // So we match using href containing ?p=ID if present.
+      const href = link.getAttribute("href") || "";
 
-      // Hide remove link
+      let matched = false;
+      childIdsSet.forEach((id) => {
+        if (href.includes("p=" + id)) matched = true;
+        // also catch /?post_type=product&p=ID
+        if (href.includes("&p=" + id)) matched = true;
+      });
+
+      if (!matched) return;
+
+      // Hide remove
       const removeBtn = row.querySelector(".wc-block-cart-item__remove-link");
       if (removeBtn) removeBtn.style.display = "none";
 
-      // Disable qty controls
+      // Disable quantity controls
       const qtyInput = row.querySelector(".wc-block-components-quantity-selector__input");
       const plusBtn  = row.querySelector(".wc-block-components-quantity-selector__button--plus");
       const minusBtn = row.querySelector(".wc-block-components-quantity-selector__button--minus");
 
       if (qtyInput) qtyInput.disabled = true;
-      if (plusBtn)  plusBtn.disabled = true;
+      if (plusBtn) plusBtn.disabled = true;
       if (minusBtn) minusBtn.disabled = true;
     });
   }
 
   async function run() {
     const cart = await fetchCart();
-    if (!cart || !cart.items) return;
+    if (!cart || !Array.isArray(cart.items)) return;
 
-    // Identify bundled child items using price=0 + sale badge is not reliable.
-    // Instead we depend on your cart meta flag `kbp_child` stored server-side.
-    // But Store API doesn't expose that by default, so we match by "0 priced items"
-    // AND “Save $X” badge is also not reliable.
-    //
-    // Practical: match by items that have "prices.price" = 0 AND "prices.regular_price" > 0
-    // (your children show discounted $0.00 + regular price in the Blocks markup)
-    const childNames = new Set();
+    // Build a set of child product IDs using the new extensions.kbp.child flag
+    const childIds = new Set();
+
     cart.items.forEach((it) => {
-      try {
-        const price = parseInt(it.prices?.price || "0", 10); // in minor units
-        const reg   = parseInt(it.prices?.regular_price || "0", 10);
-        if (price === 0 && reg > 0) childNames.add(it.name);
-      } catch(e) {}
+      const kbp = it?.extensions?.kbp;
+      if (kbp && Number(kbp.child) === 1) {
+        // Store API includes id as integer
+        childIds.add(String(it.id));
+      }
     });
 
-    hideChildControls(childNames);
+    if (childIds.size) applyToRows(childIds);
   }
 
-  // Run now + re-run because Blocks re-renders
   run();
+
+  // Blocks rerenders often
   const obs = new MutationObserver(() => run());
   obs.observe(document.documentElement, { childList: true, subtree: true });
 })();
-
