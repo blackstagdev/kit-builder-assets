@@ -335,6 +335,10 @@
   // DOES NOT REQUIRE window.KBP
   // Marks child rows and strips controls
   // =========================
+    // =========================
+  // 2) CART/CHECKOUT (WOO BLOCKS) LOGIC
+  // Uses Store API extensions (kbp.child) instead of DOM price guessing
+  // =========================
   (function cartBlocks() {
     const isCartLike =
       document.querySelector(".wc-block-cart") ||
@@ -344,51 +348,111 @@
 
     if (!isCartLike) return;
 
+    // In WP, wcSettings is usually present on Blocks pages and includes the Store API root.
+    const apiRoot =
+      (window.wcSettings && window.wcSettings.storeApiNonce && window.wcSettings.storeApiNonce.storeApiRoot) ||
+      (window.wcSettings && window.wcSettings.storeApiNonce && window.wcSettings.storeApiNonce.apiRoot) ||
+      (window.wcSettings && window.wcSettings.storeApiRoot) ||
+      "/wp-json/wc/store/v1/";
+
+    const cartEndpoint = (apiRoot.endsWith("/") ? apiRoot : apiRoot + "/") + "cart";
+
+    // Map product_id -> isChild (1/0) based on extensions.kbp.child
+    let childByProductId = new Map();
+
+    async function fetchCartFlags() {
+      try {
+        const res = await fetch(cartEndpoint, { credentials: "same-origin" });
+        if (!res.ok) return;
+
+        const data = await res.json();
+        const items = Array.isArray(data?.items) ? data.items : [];
+
+        const map = new Map();
+        for (const it of items) {
+          const pid = Number(it?.id); // Store API cart item "id" is product id
+          const kbp = it?.extensions?.kbp;
+          const isChild = Number(kbp?.child) === 1;
+          if (pid) map.set(pid, isChild);
+        }
+        childByProductId = map;
+      } catch (e) {
+        // silently fail; we’ll just not hide anything
+      }
+    }
+
     function applyChildRowUI(row, isChild) {
-      row.classList.toggle("kbp-child-item", isChild);
+      row.classList.toggle("kbp-child-item", !!isChild);
 
       if (!isChild) return;
 
-      // Hide remove button
+      // KEEP ONLY THE NAME — hide everything else
       const removeBtn = row.querySelector(".wc-block-cart-item__remove-link");
       if (removeBtn) removeBtn.style.display = "none";
 
-      // Hide prices area (line item)
       const prices = row.querySelector(".wc-block-cart-item__prices");
       if (prices) prices.style.display = "none";
 
-      // Hide sale badge
       const badge = row.querySelector(".wc-block-components-sale-badge");
       if (badge) badge.style.display = "none";
 
-      // Hide quantity selector wrapper
       const qtyWrap = row.querySelector(".wc-block-cart-item__quantity");
       if (qtyWrap) qtyWrap.style.display = "none";
 
-      // Hide row total column
       const total = row.querySelector(".wc-block-cart-item__total");
       if (total) total.style.display = "none";
+
+      // OPTIONAL: hide the image column too (uncomment if you truly want name only)
+      // const img = row.querySelector(".wc-block-cart-item__image");
+      // if (img) img.style.display = "none";
+    }
+
+    function getRowProductId(row) {
+      // Best-effort extraction: the product name link is easiest
+      const a = row.querySelector("a.wc-block-components-product-name");
+      const href = a?.getAttribute("href") || "";
+
+      // Some installs expose product id on data attributes; try those first
+      const dataPid =
+        row.getAttribute("data-product-id") ||
+        row.dataset?.productId ||
+        row.querySelector("[data-product-id]")?.getAttribute("data-product-id");
+
+      if (dataPid) return Number(dataPid);
+
+      // Fallback: parse ?add-to-cart= or /?p=, but often product pages don’t have ids.
+      // If we can’t get an id, we can’t match reliably.
+      const m = href.match(/(?:add-to-cart|p)=([0-9]+)/);
+      if (m) return Number(m[1]);
+
+      return 0;
     }
 
     function markChildRows() {
       document.querySelectorAll(".wc-block-cart-items__row").forEach((row) => {
-        // Parent kit row does NOT have discounted ins-to-zero with a regular del.
-        const ins = row.querySelector("ins.wc-block-components-product-price__value.is-discounted");
-        const del = row.querySelector("del.wc-block-components-product-price__regular");
-        const isChild = !!ins && !!del && (ins.textContent || "").trim() === "$0.00";
-
+        const pid = getRowProductId(row);
+        const isChild = pid ? childByProductId.get(pid) : false;
         applyChildRowUI(row, isChild);
       });
     }
 
-    // Run now + keep running (Blocks rerenders)
-    markChildRows();
-    const obs = new MutationObserver(markChildRows);
+    // Initial load
+    fetchCartFlags().then(markChildRows);
+
+    // Blocks rerender often; keep applying
+    const obs = new MutationObserver(() => {
+      // Re-mark quickly
+      markChildRows();
+      // And refresh flags occasionally (after quantity changes/removals)
+      clearTimeout(obs._t);
+      obs._t = setTimeout(() => fetchCartFlags().then(markChildRows), 250);
+    });
+
     obs.observe(document.documentElement, { childList: true, subtree: true });
 
     // Extra delayed passes for late renders
-    setTimeout(markChildRows, 250);
-    setTimeout(markChildRows, 800);
-    setTimeout(markChildRows, 1500);
+    setTimeout(() => fetchCartFlags().then(markChildRows), 500);
+    setTimeout(() => fetchCartFlags().then(markChildRows), 1500);
   })();
+
 })();
