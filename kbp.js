@@ -1,26 +1,36 @@
 (function () {
+  "use strict";
+
   // =========================
-  // KIT BUILDER PAGE LOGIC
+  // UTIL
   // =========================
-  if (window.KBP) {
-    // ------- STATE -------
+  const $ = (sel, root = document) => root.querySelector(sel);
+
+  const esc = (s) =>
+    String(s ?? "").replace(/[&<>"']/g, (m) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;",
+    }[m]));
+
+  // =========================
+  // 1) KIT BUILDER PAGE LOGIC
+  // Only runs if #kbp-app exists AND KBP is present
+  // =========================
+  (function kitBuilder() {
+    const root = document.getElementById("kbp-app");
+    if (!root) return;               // not on builder page
+    if (!window.KBP) return;         // builder needs localized KBP data
+
     let kit = "starter";
     let selected = [];
 
-    // ------- HELPERS -------
-    const $ = (sel, root = document) => root.querySelector(sel);
+    const maxForKit = () =>
+      (KBP.rules && KBP.rules[kit]) ? Number(KBP.rules[kit]) : 0;
 
-    const esc = (s) =>
-      String(s ?? "").replace(/[&<>"']/g, (m) => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#039;",
-      }[m]));
-
-    const maxForKit = () => (KBP.rules && KBP.rules[kit]) ? Number(KBP.rules[kit]) : 0;
-
+    // UI-only values
     const KIT_UI = {
       starter: {
         title: "Starter Kit",
@@ -29,7 +39,6 @@
         save: "Save $25",
         note: "+ Bac water & nasal spray bottle",
         badge: "Selected",
-        best: "",
       },
       advanced: {
         title: "Advanced Kit",
@@ -37,15 +46,16 @@
         price: "$269.99",
         save: "Save $60",
         note: "+ Bac water & nasal spray bottle",
-        badge: "",
         best: "Best Value",
       },
     };
 
-    function renderShell() {
-      const root = document.getElementById("kbp-app");
-      if (!root) return;
+    function setMsg(text) {
+      const el = $("#kbp-msg");
+      if (el) el.textContent = text || "";
+    }
 
+    function renderShell() {
       const freebies = Array.isArray(KBP.freebies) ? KBP.freebies : [];
 
       root.innerHTML = `
@@ -82,7 +92,7 @@
                   </button>
 
                   <button type="button" class="kbp-kit" data-kit="advanced">
-                    <span class="kbp-best" data-role="advanced-best">${esc(KIT_UI.advanced.best)}</span>
+                    <span class="kbp-best" data-role="advanced-best">${esc(KIT_UI.advanced.best || "")}</span>
                     <div class="kbp-kit-head">
                       <div>
                         <h3>${esc(KIT_UI.advanced.title)}</h3>
@@ -167,20 +177,6 @@
       `;
     }
 
-    function setMsg(text) {
-      const el = document.getElementById("kbp-msg");
-      if (el) el.textContent = text || "";
-    }
-
-    function setKit(nextKit) {
-      kit = nextKit;
-      selected = [];
-      setMsg("");
-      paintKitUI();
-      renderProducts();
-      updateUI();
-    }
-
     function paintKitUI() {
       const starterBtn = $('.kbp-kit[data-kit="starter"]');
       const advBtn = $('.kbp-kit[data-kit="advanced"]');
@@ -191,12 +187,12 @@
       const starterBadge = $('[data-role="starter-badge"]');
       if (starterBadge) starterBadge.style.display = (kit === "starter") ? "inline-flex" : "none";
 
-      const vialCount = document.getElementById("kbp-vial-count");
+      const vialCount = $("#kbp-vial-count");
       if (vialCount) vialCount.textContent = String(maxForKit());
     }
 
     function renderProducts() {
-      const wrap = document.getElementById("kbp-products");
+      const wrap = $("#kbp-products");
       if (!wrap) return;
 
       const max = maxForKit();
@@ -235,19 +231,19 @@
     function updateUI() {
       const max = maxForKit();
 
-      const counter = document.getElementById("kbp-counter");
+      const counter = $("#kbp-counter");
       if (counter) counter.textContent = `${selected.length} / ${max} selected`;
 
-      const addBtn = document.getElementById("kbp-add");
+      const addBtn = $("#kbp-add");
       if (addBtn) {
         const remaining = max - selected.length;
         addBtn.disabled = remaining !== 0;
         addBtn.textContent = remaining > 0 ? `Select ${remaining} more peptides` : "Add to cart";
       }
 
-      const totalEl = document.getElementById("kbp-total");
-      const strikeEl = document.getElementById("kbp-strike");
-      const savingsEl = document.getElementById("kbp-savings");
+      const totalEl = $("#kbp-total");
+      const strikeEl = $("#kbp-strike");
+      const savingsEl = $("#kbp-savings");
 
       if (kit === "starter") {
         if (totalEl) totalEl.textContent = KIT_UI.starter.price;
@@ -277,6 +273,15 @@
       return res.json();
     }
 
+    function setKit(nextKit) {
+      kit = nextKit;
+      selected = [];
+      setMsg("");
+      paintKitUI();
+      renderProducts();
+      updateUI();
+    }
+
     function bindEvents() {
       const starterBtn = $('.kbp-kit[data-kit="starter"]');
       const advBtn = $('.kbp-kit[data-kit="advanced"]');
@@ -284,7 +289,7 @@
       if (starterBtn) starterBtn.addEventListener("click", () => setKit("starter"));
       if (advBtn) advBtn.addEventListener("click", () => setKit("advanced"));
 
-      const addBtn = document.getElementById("kbp-add");
+      const addBtn = $("#kbp-add");
       if (addBtn) {
         addBtn.addEventListener("click", async () => {
           const max = maxForKit();
@@ -317,52 +322,73 @@
       }
     }
 
-    // ------- INIT -------
+    // INIT
     renderShell();
     paintKitUI();
     renderProducts();
     updateUI();
     bindEvents();
-  }
-})();
+  })();
 
+  // =========================
+  // 2) CART/CHECKOUT (WOO BLOCKS) LOGIC
+  // DOES NOT REQUIRE window.KBP
+  // Marks child rows and strips controls
+  // =========================
+  (function cartBlocks() {
+    const isCartLike =
+      document.querySelector(".wc-block-cart") ||
+      document.querySelector(".wc-block-checkout") ||
+      document.body.classList.contains("woocommerce-cart") ||
+      document.body.classList.contains("woocommerce-checkout");
 
-// =========================
-// CART (WOO BLOCKS) LOGIC
-// Adds .kbp-child-item to bundled $0 discounted rows
-// =========================
-(function () {
-  const isCartLike =
-    document.querySelector(".wc-block-cart") ||
-    document.querySelector(".wc-block-checkout") ||
-    document.body.classList.contains("woocommerce-cart") ||
-    document.body.classList.contains("woocommerce-checkout");
+    if (!isCartLike) return;
 
-  if (!isCartLike) return;
+    function applyChildRowUI(row, isChild) {
+      row.classList.toggle("kbp-child-item", isChild);
 
-  function markChildRows() {
-    document.querySelectorAll(".wc-block-cart-items__row").forEach((row) => {
+      if (!isChild) return;
 
-      // CHILD rows in your markup show both <del> regular price and <ins> discounted $0.00
-      const hasDel = !!row.querySelector("del.wc-block-components-product-price__regular");
-      const insVal =
-        row.querySelector("ins .wc-block-components-product-price__value") ||
-        row.querySelector("ins.wc-block-components-product-price__value") ||
-        row.querySelector("ins");
+      // Hide remove button
+      const removeBtn = row.querySelector(".wc-block-cart-item__remove-link");
+      if (removeBtn) removeBtn.style.display = "none";
 
-      const insText = (insVal?.textContent || "").trim();
+      // Hide prices area (line item)
+      const prices = row.querySelector(".wc-block-cart-item__prices");
+      if (prices) prices.style.display = "none";
 
-      // Only mark if discounted-to-zero (child items)
-      if (hasDel && insText === "$0.00") {
-        row.classList.add("kbp-child-item");
-      } else {
-        row.classList.remove("kbp-child-item");
-      }
-    });
-  }
+      // Hide sale badge
+      const badge = row.querySelector(".wc-block-components-sale-badge");
+      if (badge) badge.style.display = "none";
 
-  // Run now + keep running because Blocks re-renders
-  markChildRows();
-  const obs = new MutationObserver(() => markChildRows());
-  obs.observe(document.documentElement, { childList: true, subtree: true });
+      // Hide quantity selector wrapper
+      const qtyWrap = row.querySelector(".wc-block-cart-item__quantity");
+      if (qtyWrap) qtyWrap.style.display = "none";
+
+      // Hide row total column
+      const total = row.querySelector(".wc-block-cart-item__total");
+      if (total) total.style.display = "none";
+    }
+
+    function markChildRows() {
+      document.querySelectorAll(".wc-block-cart-items__row").forEach((row) => {
+        // Parent kit row does NOT have discounted ins-to-zero with a regular del.
+        const ins = row.querySelector("ins.wc-block-components-product-price__value.is-discounted");
+        const del = row.querySelector("del.wc-block-components-product-price__regular");
+        const isChild = !!ins && !!del && (ins.textContent || "").trim() === "$0.00";
+
+        applyChildRowUI(row, isChild);
+      });
+    }
+
+    // Run now + keep running (Blocks rerenders)
+    markChildRows();
+    const obs = new MutationObserver(markChildRows);
+    obs.observe(document.documentElement, { childList: true, subtree: true });
+
+    // Extra delayed passes for late renders
+    setTimeout(markChildRows, 250);
+    setTimeout(markChildRows, 800);
+    setTimeout(markChildRows, 1500);
+  })();
 })();
