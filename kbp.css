@@ -4,7 +4,6 @@
    ========================= */
 
 .kbp-page{
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   background:#f6f7fb;
   min-height:100vh;
 }
@@ -47,8 +46,7 @@
   margin: 0 auto;
   padding: 28px 16px 48px;
   display:grid;
-  grid-template-columns: 2fr 1fr;
-  gap:22px;
+  gap: 1.75rem;
   align-items:start;
 }
 @media (max-width: 980px){
