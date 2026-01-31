@@ -339,26 +339,25 @@
 
   if (!isCartLike) return;
 
-  function isBundleChildRow(row) {
-    const del = row.querySelector("del.wc-block-components-product-price__regular");
-    const ins = row.querySelector("ins.wc-block-components-product-price__value.is-discounted");
-    const totalVal = row.querySelector(
-      ".wc-block-cart-item__total .wc-block-components-product-price__value"
-    );
+function isBundleChildRow(row) {
+  const del = row.querySelector("del.wc-block-components-product-price__regular");
+  const ins = row.querySelector("ins.wc-block-components-product-price__value.is-discounted");
+  const totalVal = row.querySelector(".wc-block-cart-item__total .wc-block-components-product-price__value");
 
-    const totalZero = totalVal && (totalVal.textContent || "").trim() === "$0.00";
-    const insZero = ins && (ins.textContent || "").trim() === "$0.00";
+  const insZero = ins && (ins.textContent || "").trim() === "$0.00";
+  const totalZero = totalVal && (totalVal.textContent || "").trim() === "$0.00";
 
-    // If you want to hide ANY $0 row, use: return totalZero;
-    // This version is stricter: $0 total AND discounted markup
-    return !!del && insZero && totalZero;
-  }
+  return !!del && insZero && totalZero;
+}
 
-  function markRows() {
-    document.querySelectorAll(".wc-block-cart-items__row").forEach((row) => {
-      row.classList.toggle("kbp-child-item", isBundleChildRow(row));
-    });
-  }
+function markRows() {
+  document.querySelectorAll(".wc-block-cart-items__row").forEach((row) => {
+    const isChild = isBundleChildRow(row);
+    if (isChild) row.classList.add("kbp-child-item");
+    else row.classList.remove("kbp-child-item");
+  });
+}
+
 
   markRows();
 
