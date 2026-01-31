@@ -330,129 +330,120 @@
     bindEvents();
   })();
 
-  // =========================
-  // 2) CART/CHECKOUT (WOO BLOCKS) LOGIC
-  // DOES NOT REQUIRE window.KBP
-  // Marks child rows and strips controls
-  // =========================
-    // =========================
-  // 2) CART/CHECKOUT (WOO BLOCKS) LOGIC
-  // Uses Store API extensions (kbp.child) instead of DOM price guessing
-  // =========================
-  (function cartBlocks() {
-    const isCartLike =
-      document.querySelector(".wc-block-cart") ||
-      document.querySelector(".wc-block-checkout") ||
-      document.body.classList.contains("woocommerce-cart") ||
-      document.body.classList.contains("woocommerce-checkout");
+(function cartBlocks() {
+  const isCartLike =
+    document.querySelector(".wc-block-cart") ||
+    document.querySelector(".wc-block-checkout") ||
+    document.body.classList.contains("woocommerce-cart") ||
+    document.body.classList.contains("woocommerce-checkout");
 
-    if (!isCartLike) return;
+  if (!isCartLike) return;
 
-    // In WP, wcSettings is usually present on Blocks pages and includes the Store API root.
-    const apiRoot =
-      (window.wcSettings && window.wcSettings.storeApiNonce && window.wcSettings.storeApiNonce.storeApiRoot) ||
-      (window.wcSettings && window.wcSettings.storeApiNonce && window.wcSettings.storeApiNonce.apiRoot) ||
-      (window.wcSettings && window.wcSettings.storeApiRoot) ||
-      "/wp-json/wc/store/v1/";
+  // Store API root is usually here on Blocks pages
+  const apiRoot =
+    window.wcSettings?.storeApiNonce?.storeApiRoot ||
+    window.wcSettings?.storeApiRoot ||
+    "/wp-json/wc/store/v1/";
 
-    const cartEndpoint = (apiRoot.endsWith("/") ? apiRoot : apiRoot + "/") + "cart";
+  const cartEndpoint = (apiRoot.endsWith("/") ? apiRoot : apiRoot + "/") + "cart";
 
-    // Map product_id -> isChild (1/0) based on extensions.kbp.child
-    let childByProductId = new Map();
+  // Nonce header (safe to include; some configs require it)
+  const nonce = window.wcSettings?.storeApiNonce?.nonce;
+  const headers = nonce ? { "X-WC-Store-API-Nonce": nonce } : {};
 
-    async function fetchCartFlags() {
-      try {
-        const res = await fetch(cartEndpoint, { credentials: "same-origin" });
-        if (!res.ok) return;
+  const normalizeUrl = (u) => {
+    try {
+      const url = new URL(u, window.location.origin);
+      url.hash = "";
+      url.search = "";
+      // normalize trailing slash
+      return url.pathname.replace(/\/+$/, "") || "/";
+    } catch (e) {
+      return String(u || "").trim().replace(/\/+$/, "");
+    }
+  };
 
-        const data = await res.json();
-        const items = Array.isArray(data?.items) ? data.items : [];
+  // Maps normalized permalink path -> isChild boolean
+  let childByPermalink = new Map();
+  // Fallback: name -> isChild (if permalink ever differs)
+  let childByName = new Map();
 
-        const map = new Map();
-        for (const it of items) {
-          const pid = Number(it?.id); // Store API cart item "id" is product id
-          const kbp = it?.extensions?.kbp;
-          const isChild = Number(kbp?.child) === 1;
-          if (pid) map.set(pid, isChild);
-        }
-        childByProductId = map;
-      } catch (e) {
-        // silently fail; we’ll just not hide anything
+  async function fetchCartFlags() {
+    try {
+      const res = await fetch(cartEndpoint, {
+        credentials: "same-origin",
+        headers,
+      });
+      if (!res.ok) return;
+
+      const data = await res.json();
+      const items = Array.isArray(data?.items) ? data.items : [];
+
+      const pMap = new Map();
+      const nMap = new Map();
+
+      for (const it of items) {
+        const isChild = Number(it?.extensions?.kbp?.child) === 1;
+        const permalink = it?.permalink || it?.links?.permalink; // permalink is normally present
+        const name = (it?.name || "").trim();
+
+        if (permalink) pMap.set(normalizeUrl(permalink), isChild);
+        if (name) nMap.set(name, isChild);
       }
+
+      childByPermalink = pMap;
+      childByName = nMap;
+    } catch (e) {
+      // ignore
     }
+  }
 
-    function applyChildRowUI(row, isChild) {
-      row.classList.toggle("kbp-child-item", !!isChild);
+  function applyChildRowUI(row, isChild) {
+    row.classList.toggle("kbp-child-item", !!isChild);
+    if (!isChild) return;
 
-      if (!isChild) return;
+    // Hide everything except the name
+    row.querySelector(".wc-block-cart-item__prices")?.setAttribute("style", "display:none!important");
+    row.querySelector(".wc-block-cart-item__remove-link")?.setAttribute("style", "display:none!important");
+    row.querySelector(".wc-block-components-sale-badge")?.setAttribute("style", "display:none!important");
+    row.querySelector(".wc-block-cart-item__quantity")?.setAttribute("style", "display:none!important");
+    row.querySelector(".wc-block-cart-item__total")?.setAttribute("style", "display:none!important");
 
-      // KEEP ONLY THE NAME — hide everything else
-      const removeBtn = row.querySelector(".wc-block-cart-item__remove-link");
-      if (removeBtn) removeBtn.style.display = "none";
+    // OPTIONAL: if you truly want ONLY the name, hide image too:
+    // row.querySelector(".wc-block-cart-item__image")?.setAttribute("style", "display:none!important");
+  }
 
-      const prices = row.querySelector(".wc-block-cart-item__prices");
-      if (prices) prices.style.display = "none";
-
-      const badge = row.querySelector(".wc-block-components-sale-badge");
-      if (badge) badge.style.display = "none";
-
-      const qtyWrap = row.querySelector(".wc-block-cart-item__quantity");
-      if (qtyWrap) qtyWrap.style.display = "none";
-
-      const total = row.querySelector(".wc-block-cart-item__total");
-      if (total) total.style.display = "none";
-
-      // OPTIONAL: hide the image column too (uncomment if you truly want name only)
-      // const img = row.querySelector(".wc-block-cart-item__image");
-      // if (img) img.style.display = "none";
-    }
-
-    function getRowProductId(row) {
-      // Best-effort extraction: the product name link is easiest
+  function markChildRows() {
+    document.querySelectorAll(".wc-block-cart-items__row").forEach((row) => {
       const a = row.querySelector("a.wc-block-components-product-name");
       const href = a?.getAttribute("href") || "";
+      const name = (a?.textContent || "").trim();
 
-      // Some installs expose product id on data attributes; try those first
-      const dataPid =
-        row.getAttribute("data-product-id") ||
-        row.dataset?.productId ||
-        row.querySelector("[data-product-id]")?.getAttribute("data-product-id");
+      const byPermalink = href ? childByPermalink.get(normalizeUrl(href)) : undefined;
+      const byName = name ? childByName.get(name) : undefined;
 
-      if (dataPid) return Number(dataPid);
+      const isChild =
+        (typeof byPermalink === "boolean" ? byPermalink : undefined) ??
+        (typeof byName === "boolean" ? byName : false);
 
-      // Fallback: parse ?add-to-cart= or /?p=, but often product pages don’t have ids.
-      // If we can’t get an id, we can’t match reliably.
-      const m = href.match(/(?:add-to-cart|p)=([0-9]+)/);
-      if (m) return Number(m[1]);
-
-      return 0;
-    }
-
-    function markChildRows() {
-      document.querySelectorAll(".wc-block-cart-items__row").forEach((row) => {
-        const pid = getRowProductId(row);
-        const isChild = pid ? childByProductId.get(pid) : false;
-        applyChildRowUI(row, isChild);
-      });
-    }
-
-    // Initial load
-    fetchCartFlags().then(markChildRows);
-
-    // Blocks rerender often; keep applying
-    const obs = new MutationObserver(() => {
-      // Re-mark quickly
-      markChildRows();
-      // And refresh flags occasionally (after quantity changes/removals)
-      clearTimeout(obs._t);
-      obs._t = setTimeout(() => fetchCartFlags().then(markChildRows), 250);
+      applyChildRowUI(row, isChild);
     });
+  }
 
-    obs.observe(document.documentElement, { childList: true, subtree: true });
+  // Initial
+  fetchCartFlags().then(markChildRows);
 
-    // Extra delayed passes for late renders
-    setTimeout(() => fetchCartFlags().then(markChildRows), 500);
-    setTimeout(() => fetchCartFlags().then(markChildRows), 1500);
-  })();
+  // Blocks rerender; observe and re-apply
+  const obs = new MutationObserver(() => {
+    markChildRows();
+    clearTimeout(obs._t);
+    obs._t = setTimeout(() => fetchCartFlags().then(markChildRows), 250);
+  });
+
+  obs.observe(document.documentElement, { childList: true, subtree: true });
+
+  setTimeout(() => fetchCartFlags().then(markChildRows), 600);
+  setTimeout(() => fetchCartFlags().then(markChildRows), 1500);
+})();
 
 })();
