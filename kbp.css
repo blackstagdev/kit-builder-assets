@@ -1,7 +1,27 @@
-/* =========================
-   KBP — Kit Builder Styles
-   Matches the NEW markup rendered by kbp.js
-   ========================= */
+/* Force full width even inside theme containers */
+#kbp-app,
+.kbp-page {
+  width: 100% !important;
+  max-width: 1200px !important; /* adjust if you want wider */
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* If your theme limits entry content, this helps too */
+.entry-content #kbp-app,
+.entry-content .kbp-page,
+.woocommerce #kbp-app,
+.woocommerce .kbp-page {
+  width: 100% !important;
+  max-width: 1200px !important;
+}
+
+/* Some themes set max-width on direct children */
+.entry-content > #kbp-app,
+.entry-content > .kbp-page {
+  max-width: 1200px !important;
+}
+
 
 .kbp-page{
   background:#f6f7fb;
