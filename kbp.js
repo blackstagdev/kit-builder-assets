@@ -339,111 +339,39 @@
 
   if (!isCartLike) return;
 
-  // Store API root is usually here on Blocks pages
-  const apiRoot =
-    window.wcSettings?.storeApiNonce?.storeApiRoot ||
-    window.wcSettings?.storeApiRoot ||
-    "/wp-json/wc/store/v1/";
+  function isBundleChildRow(row) {
+    const del = row.querySelector("del.wc-block-components-product-price__regular");
+    const ins = row.querySelector("ins.wc-block-components-product-price__value.is-discounted");
+    const totalVal = row.querySelector(
+      ".wc-block-cart-item__total .wc-block-components-product-price__value"
+    );
 
-  const cartEndpoint = (apiRoot.endsWith("/") ? apiRoot : apiRoot + "/") + "cart";
+    const totalZero = totalVal && (totalVal.textContent || "").trim() === "$0.00";
+    const insZero = ins && (ins.textContent || "").trim() === "$0.00";
 
-  // Nonce header (safe to include; some configs require it)
-  const nonce = window.wcSettings?.storeApiNonce?.nonce;
-  const headers = nonce ? { "X-WC-Store-API-Nonce": nonce } : {};
-
-  const normalizeUrl = (u) => {
-    try {
-      const url = new URL(u, window.location.origin);
-      url.hash = "";
-      url.search = "";
-      // normalize trailing slash
-      return url.pathname.replace(/\/+$/, "") || "/";
-    } catch (e) {
-      return String(u || "").trim().replace(/\/+$/, "");
-    }
-  };
-
-  // Maps normalized permalink path -> isChild boolean
-  let childByPermalink = new Map();
-  // Fallback: name -> isChild (if permalink ever differs)
-  let childByName = new Map();
-
-  async function fetchCartFlags() {
-    try {
-      const res = await fetch(cartEndpoint, {
-        credentials: "same-origin",
-        headers,
-      });
-      if (!res.ok) return;
-
-      const data = await res.json();
-      const items = Array.isArray(data?.items) ? data.items : [];
-
-      const pMap = new Map();
-      const nMap = new Map();
-
-      for (const it of items) {
-        const isChild = Number(it?.extensions?.kbp?.child) === 1;
-        const permalink = it?.permalink || it?.links?.permalink; // permalink is normally present
-        const name = (it?.name || "").trim();
-
-        if (permalink) pMap.set(normalizeUrl(permalink), isChild);
-        if (name) nMap.set(name, isChild);
-      }
-
-      childByPermalink = pMap;
-      childByName = nMap;
-    } catch (e) {
-      // ignore
-    }
+    // If you want to hide ANY $0 row, use: return totalZero;
+    // This version is stricter: $0 total AND discounted markup
+    return !!del && insZero && totalZero;
   }
 
-  function applyChildRowUI(row, isChild) {
-    row.classList.toggle("kbp-child-item", !!isChild);
-    if (!isChild) return;
-
-    // Hide everything except the name
-    row.querySelector(".wc-block-cart-item__prices")?.setAttribute("style", "display:none!important");
-    row.querySelector(".wc-block-cart-item__remove-link")?.setAttribute("style", "display:none!important");
-    row.querySelector(".wc-block-components-sale-badge")?.setAttribute("style", "display:none!important");
-    row.querySelector(".wc-block-cart-item__quantity")?.setAttribute("style", "display:none!important");
-    row.querySelector(".wc-block-cart-item__total")?.setAttribute("style", "display:none!important");
-
-    // OPTIONAL: if you truly want ONLY the name, hide image too:
-    // row.querySelector(".wc-block-cart-item__image")?.setAttribute("style", "display:none!important");
-  }
-
-  function markChildRows() {
+  function markRows() {
     document.querySelectorAll(".wc-block-cart-items__row").forEach((row) => {
-      const a = row.querySelector("a.wc-block-components-product-name");
-      const href = a?.getAttribute("href") || "";
-      const name = (a?.textContent || "").trim();
-
-      const byPermalink = href ? childByPermalink.get(normalizeUrl(href)) : undefined;
-      const byName = name ? childByName.get(name) : undefined;
-
-      const isChild =
-        (typeof byPermalink === "boolean" ? byPermalink : undefined) ??
-        (typeof byName === "boolean" ? byName : false);
-
-      applyChildRowUI(row, isChild);
+      row.classList.toggle("kbp-child-item", isBundleChildRow(row));
     });
   }
 
-  // Initial
-  fetchCartFlags().then(markChildRows);
+  markRows();
 
-  // Blocks rerender; observe and re-apply
+  // Blocks rerender -> reapply
   const obs = new MutationObserver(() => {
-    markChildRows();
-    clearTimeout(obs._t);
-    obs._t = setTimeout(() => fetchCartFlags().then(markChildRows), 250);
+    markRows();
   });
-
   obs.observe(document.documentElement, { childList: true, subtree: true });
 
-  setTimeout(() => fetchCartFlags().then(markChildRows), 600);
-  setTimeout(() => fetchCartFlags().then(markChildRows), 1500);
+  // extra passes
+  setTimeout(markRows, 250);
+  setTimeout(markRows, 800);
+  setTimeout(markRows, 1500);
 })();
 
 })();
