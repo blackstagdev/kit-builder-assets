@@ -405,3 +405,39 @@
   const obs = new MutationObserver(() => run());
   obs.observe(document.documentElement, { childList: true, subtree: true });
 })();
+
+(function () {
+  const isCart =
+    document.querySelector(".wc-block-cart") ||
+    document.body.classList.contains("woocommerce-cart");
+
+  if (!isCart) return;
+
+  function markChildItems() {
+    document.querySelectorAll(".wc-block-cart-items__row").forEach((row) => {
+
+      // CHILD items always have: <ins class="...is-discounted">$0.00</ins>
+      const ins = row.querySelector(
+        "ins.wc-block-components-product-price__value.is-discounted"
+      );
+
+      if (!ins) return;
+
+      const txt = (ins.textContent || "").trim();
+
+      // Only match bundled children ($0.00 discounted)
+      if (txt !== "$0.00") return;
+
+      // Mark this row as a child bundle item
+      row.classList.add("kbp-child-item");
+    });
+  }
+
+  // Run now
+  markChildItems();
+
+  // Woo Blocks rerenders constantly, so re-run
+  const obs = new MutationObserver(() => markChildItems());
+  obs.observe(document.documentElement, { childList: true, subtree: true });
+})();
+
