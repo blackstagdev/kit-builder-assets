@@ -1,3 +1,11 @@
+.kbp-child-item .wc-block-cart-item__prices,
+.kbp-child-item .wc-block-cart-item__remove-link,
+.kbp-child-item .wc-block-components-sale-badge,
+.kbp-child-item .wc-block-cart-item__quantity,
+.kbp-child-item .wc-block-cart-item__total {
+  display: none !important;
+}
+
 /* Force full width even inside theme containers */
 #kbp-app,
 .kbp-page {
