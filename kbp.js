@@ -330,47 +330,90 @@
     bindEvents();
   })();
 
+// =========================
+// 2) CART/CHECKOUT (WOO BLOCKS) LOGIC
+// Waits for Blocks cart DOM to appear before attaching observer
+// =========================
 (function cartBlocks() {
-  const isCartLike =
-    document.querySelector(".wc-block-cart") ||
-    document.querySelector(".wc-block-checkout") ||
-    document.body.classList.contains("woocommerce-cart") ||
-    document.body.classList.contains("woocommerce-checkout");
+  // Add a marker so you can confirm this code ran at least once
+  document.documentElement.classList.add("kbp-cart-js-loaded");
 
-  if (!isCartLike) return;
+  function isCartDomReady() {
+    return !!(
+      document.querySelector(".wc-block-cart") ||
+      document.querySelector(".wc-block-checkout") ||
+      document.querySelector(".wc-block-cart-items__row")
+    );
+  }
 
-function isBundleChildRow(row) {
-  const del = row.querySelector("del.wc-block-components-product-price__regular");
-  const ins = row.querySelector("ins.wc-block-components-product-price__value.is-discounted");
-  const totalVal = row.querySelector(".wc-block-cart-item__total .wc-block-components-product-price__value");
+  function moneyToNumber(txt) {
+    // Turns "$0.00" or "0,00 €" etc into a number
+    const s = String(txt || "")
+      .replace(/[^0-9.,-]/g, "")
+      .trim();
 
-  const insZero = ins && (ins.textContent || "").trim() === "$0.00";
-  const totalZero = totalVal && (totalVal.textContent || "").trim() === "$0.00";
+    if (!s) return NaN;
 
-  return !!del && insZero && totalZero;
-}
+    // If it has both "." and ",", assume "," is thousands separator
+    if (s.includes(".") && s.includes(",")) {
+      return Number(s.replace(/,/g, ""));
+    }
 
-function markRows() {
-  document.querySelectorAll(".wc-block-cart-items__row").forEach((row) => {
-    const isChild = isBundleChildRow(row);
-    if (isChild) row.classList.add("kbp-child-item");
-    else row.classList.remove("kbp-child-item");
-  });
-}
+    // If only comma, treat as decimal separator
+    if (s.includes(",") && !s.includes(".")) {
+      return Number(s.replace(",", "."));
+    }
 
+    return Number(s);
+  }
 
-  markRows();
+  function isBundleChildRow(row) {
+    const del = row.querySelector("del.wc-block-components-product-price__regular");
+    const ins = row.querySelector("ins.wc-block-components-product-price__value.is-discounted");
 
-  // Blocks rerender -> reapply
-  const obs = new MutationObserver(() => {
+    const totalVal = row.querySelector(
+      ".wc-block-cart-item__total .wc-block-components-product-price__value"
+    );
+
+    const insNum = moneyToNumber(ins?.textContent);
+    const totalNum = moneyToNumber(totalVal?.textContent);
+
+    // Your child items are discounted to zero and show a del+ins pair
+    return !!del && ins && insNum === 0 && totalNum === 0;
+  }
+
+  function markRows() {
+    document.querySelectorAll(".wc-block-cart-items__row").forEach((row) => {
+      const isChild = isBundleChildRow(row);
+      row.classList.toggle("kbp-child-item", isChild);
+    });
+  }
+
+  function start() {
+    // marker so you can confirm we reached "start"
+    document.documentElement.classList.add("kbp-cart-js-started");
+
     markRows();
-  });
-  obs.observe(document.documentElement, { childList: true, subtree: true });
 
-  // extra passes
-  setTimeout(markRows, 250);
-  setTimeout(markRows, 800);
-  setTimeout(markRows, 1500);
+    const obs = new MutationObserver(markRows);
+    obs.observe(document.documentElement, { childList: true, subtree: true });
+
+    setTimeout(markRows, 250);
+    setTimeout(markRows, 800);
+    setTimeout(markRows, 1500);
+  }
+
+  // Wait until blocks cart DOM exists
+  let tries = 0;
+  const timer = setInterval(() => {
+    tries++;
+    if (isCartDomReady()) {
+      clearInterval(timer);
+      start();
+    }
+    // stop trying after ~10 seconds
+    if (tries > 100) clearInterval(timer);
+  }, 100);
 })();
 
 })();
