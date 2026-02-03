@@ -227,15 +227,16 @@
             </div>
 
             <div style="display:flex; align-items:center; gap: 8px;">
-              <button type="button" id="kbp-water-minus">−</button>
+              <button type="button" id="kbp-water-minus" class="kbp-qty-btn">−</button>
               <input
-                type="number"
-                id="kbp-water-qty"
+                 type="number"
+    id="kbp-water-qty"
+    class="kbp-qty-input"
                 min="1"
                 value="${waterQty}"
                 style="width: 60px; text-align:center;"
               />
-              <button type="button" id="kbp-water-plus">+</button>
+              <button type="button" id="kbp-water-plus" class="kbp-qty-btn">+</button>
             </div>
           </div>
         </div>
