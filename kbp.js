@@ -15,40 +15,31 @@
       "'": "&#039;",
     }[m]));
 
+  // money formatting (builder page)
+  const toMoney = (n) => {
+    const num = Number(n || 0);
+    return num.toLocaleString("en-US", { style: "currency", currency: "USD" });
+  };
+
+  const toNumber = (v) => {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+  };
+
   // =========================
   // 1) KIT BUILDER PAGE LOGIC
   // Only runs if #kbp-app exists AND KBP is present
   // =========================
   (function kitBuilder() {
     const root = document.getElementById("kbp-app");
-    if (!root) return;               // not on builder page
-    if (!window.KBP) return;         // builder needs localized KBP data
+    if (!root) return; // not on builder page
+    if (!window.KBP) return; // builder needs localized KBP data
 
     let kit = "starter";
     let selected = [];
 
     const maxForKit = () =>
-      (KBP.rules && KBP.rules[kit]) ? Number(KBP.rules[kit]) : 0;
-
-    // UI-only values
-    const KIT_UI = {
-      starter: {
-        title: "Starter Kit",
-        subtitle: "3 Peptide Vials (3ml each)",
-        price: "$149.99",
-        save: "Save $25",
-        note: "+ Bac water & nasal spray bottle",
-        badge: "Selected",
-      },
-      advanced: {
-        title: "Advanced Kit",
-        subtitle: "6 Peptide Vials (3ml each)",
-        price: "$269.99",
-        save: "Save $60",
-        note: "+ Bac water & nasal spray bottle",
-        best: "Best Value",
-      },
-    };
+      KBP.rules && KBP.rules[kit] ? Number(KBP.rules[kit]) : 0;
 
     function setMsg(text) {
       const el = $("#kbp-msg");
@@ -63,7 +54,7 @@
           <div class="kbp-hero">
             <span class="kbp-badge">Best Seller</span>
             <h1>Build Your Own Research Kit</h1>
-            <p>Choose your peptides • Bac water &amp; nasal spray included • Save up to 25%</p>
+            <p>Choose your peptides • Bac water &amp; nasal spray included • Save 10%</p>
           </div>
 
           <div class="kbp-container">
@@ -79,31 +70,23 @@
                   <button type="button" class="kbp-kit" data-kit="starter">
                     <div class="kbp-kit-head">
                       <div>
-                        <h3>${esc(KIT_UI.starter.title)}</h3>
-                        <p>${esc(KIT_UI.starter.subtitle)}</p>
+                        <h3>Starter Kit</h3>
+                        <p>3 Peptide Vials (3ml each)</p>
                       </div>
-                      <span class="kbp-selected-badge" data-role="starter-badge">${esc(KIT_UI.starter.badge)}</span>
+                      <span class="kbp-selected-badge" data-role="starter-badge">Selected</span>
                     </div>
-                    <div class="kbp-kit-price">
-                      <span class="kbp-price">${esc(KIT_UI.starter.price)}</span>
-                      <span class="kbp-save">${esc(KIT_UI.starter.save)}</span>
-                    </div>
-                    <div class="kbp-kit-note">${esc(KIT_UI.starter.note)}</div>
+                    <div class="kbp-kit-note">Price = sum of selected vials</div>
                   </button>
 
                   <button type="button" class="kbp-kit" data-kit="advanced">
-                    <span class="kbp-best" data-role="advanced-best">${esc(KIT_UI.advanced.best || "")}</span>
+                    <span class="kbp-best" data-role="advanced-best">Best Value</span>
                     <div class="kbp-kit-head">
                       <div>
-                        <h3>${esc(KIT_UI.advanced.title)}</h3>
-                        <p>${esc(KIT_UI.advanced.subtitle)}</p>
+                        <h3>Advanced Kit</h3>
+                        <p>6 Peptide Vials (3ml each)</p>
                       </div>
                     </div>
-                    <div class="kbp-kit-price">
-                      <span class="kbp-price">${esc(KIT_UI.advanced.price)}</span>
-                      <span class="kbp-save">${esc(KIT_UI.advanced.save)}</span>
-                    </div>
-                    <div class="kbp-kit-note">${esc(KIT_UI.advanced.note)}</div>
+                    <div class="kbp-kit-note">Price = sum of selected vials</div>
                   </button>
                 </div>
               </div>
@@ -118,7 +101,7 @@
                 </div>
 
                 <p class="kbp-desc">
-                  Choose peptide vials for your kit. Reconstitute with the included bac water.
+                  Choose peptide vials for your kit.
                 </p>
 
                 <div class="kbp-products" id="kbp-products"></div>
@@ -141,7 +124,9 @@
                   </div>
 
                   ${
-                    freebies.map(f => `
+                    freebies
+                      .map(
+                        (f) => `
                       <div class="kbp-inc kbp-free">
                         <div class="kbp-inc-ico">🎁</div>
                         <div class="kbp-inc-txt">
@@ -150,18 +135,20 @@
                         </div>
                         <div class="kbp-check">✓</div>
                       </div>
-                    `).join("")
+                    `
+                      )
+                      .join("")
                   }
                 </div>
 
                 <div class="kbp-total-box">
                   <div class="kbp-row">
-                    <span>Kit Price</span>
-                    <span class="kbp-strike" id="kbp-strike">$0.00</span>
+                    <span>Vials Subtotal</span>
+                    <span id="kbp-subtotal">$0.00</span>
                   </div>
                   <div class="kbp-row kbp-green">
-                    <span>Bundle Savings</span>
-                    <span id="kbp-savings">-$0.00</span>
+                    <span>Discount (10%)</span>
+                    <span id="kbp-discount">-$0.00</span>
                   </div>
                   <div class="kbp-row kbp-total">
                     <span>Total</span>
@@ -185,10 +172,15 @@
       if (advBtn) advBtn.classList.toggle("active", kit === "advanced");
 
       const starterBadge = $('[data-role="starter-badge"]');
-      if (starterBadge) starterBadge.style.display = (kit === "starter") ? "inline-flex" : "none";
+      if (starterBadge)
+        starterBadge.style.display = kit === "starter" ? "inline-flex" : "none";
 
       const vialCount = $("#kbp-vial-count");
       if (vialCount) vialCount.textContent = String(maxForKit());
+
+      // reset counter label max after kit switch
+      const counter = $("#kbp-counter");
+      if (counter) counter.textContent = `${selected.length} / ${maxForKit()} selected`;
     }
 
     function renderProducts() {
@@ -199,6 +191,9 @@
       wrap.innerHTML = "";
 
       (KBP.products || []).forEach((p) => {
+        // p.price is expected from PHP localization
+        const price = toNumber(p.price);
+
         const checked = selected.includes(p.id);
         const disabled = !checked && selected.length >= max;
 
@@ -211,7 +206,9 @@
           <span class="kbp-box">${checked ? "✓" : ""}</span>
           <div class="kbp-item-body">
             <div class="kbp-name">${esc(p.name)}</div>
-            <div class="kbp-meta">${p.sku ? ("SKU: " + esc(p.sku)) : ""}</div>
+            <div class="kbp-meta">
+              ${p.sku ? "SKU: " + esc(p.sku) + " • " : ""}${esc(toMoney(price))}
+            </div>
           </div>
         `;
 
@@ -228,32 +225,39 @@
       });
     }
 
+    function getSelectedSubtotal() {
+      // KBP.products items look like: { id, name, sku, price }
+      const map = new Map((KBP.products || []).map((p) => [p.id, toNumber(p.price)]));
+      return selected.reduce((sum, id) => sum + (map.get(id) || 0), 0);
+    }
+
     function updateUI() {
       const max = maxForKit();
 
       const counter = $("#kbp-counter");
       if (counter) counter.textContent = `${selected.length} / ${max} selected`;
 
+      const remaining = max - selected.length;
+
       const addBtn = $("#kbp-add");
       if (addBtn) {
-        const remaining = max - selected.length;
         addBtn.disabled = remaining !== 0;
-        addBtn.textContent = remaining > 0 ? `Select ${remaining} more peptides` : "Add to cart";
+        addBtn.textContent =
+          remaining > 0 ? `Select ${remaining} more peptides` : "Add to cart";
       }
 
+      // Pricing: subtotal = sum of vial prices; total = subtotal - 10%
+      const subtotal = getSelectedSubtotal();
+      const discount = subtotal * 0.10;
+      const total = subtotal - discount;
+
+      const subtotalEl = $("#kbp-subtotal");
+      const discountEl = $("#kbp-discount");
       const totalEl = $("#kbp-total");
-      const strikeEl = $("#kbp-strike");
-      const savingsEl = $("#kbp-savings");
 
-      if (kit === "starter") {
-        if (totalEl) totalEl.textContent = KIT_UI.starter.price;
-        if (strikeEl) strikeEl.textContent = "$174.99";
-        if (savingsEl) savingsEl.textContent = "-$25.00";
-      } else {
-        if (totalEl) totalEl.textContent = KIT_UI.advanced.price;
-        if (strikeEl) strikeEl.textContent = "$329.99";
-        if (savingsEl) savingsEl.textContent = "-$60.00";
-      }
+      if (subtotalEl) subtotalEl.textContent = toMoney(subtotal);
+      if (discountEl) discountEl.textContent = "-" + toMoney(discount);
+      if (totalEl) totalEl.textContent = toMoney(total);
     }
 
     async function post(data) {
@@ -330,90 +334,76 @@
     bindEvents();
   })();
 
-// =========================
-// 2) CART/CHECKOUT (WOO BLOCKS) LOGIC
-// Waits for Blocks cart DOM to appear before attaching observer
-// =========================
-(function cartBlocks() {
-  // Add a marker so you can confirm this code ran at least once
-  document.documentElement.classList.add("kbp-cart-js-loaded");
+  // =========================
+  // 2) CART/CHECKOUT (WOO BLOCKS) LOGIC
+  // Your old logic only hid $0 discounted rows.
+  // Now child vials may have original price, so we hide by name match:
+  // hide any item row whose name is NOT the parent kit AND has a kit parent present.
+  // (Still safest if you keep child items priced $0 in PHP totals.)
+  // =========================
+  (function cartBlocks() {
+    document.documentElement.classList.add("kbp-cart-js-loaded");
 
-  function isCartDomReady() {
-    return !!(
-      document.querySelector(".wc-block-cart") ||
-      document.querySelector(".wc-block-checkout") ||
-      document.querySelector(".wc-block-cart-items__row")
-    );
-  }
-
-  function moneyToNumber(txt) {
-    // Turns "$0.00" or "0,00 €" etc into a number
-    const s = String(txt || "")
-      .replace(/[^0-9.,-]/g, "")
-      .trim();
-
-    if (!s) return NaN;
-
-    // If it has both "." and ",", assume "," is thousands separator
-    if (s.includes(".") && s.includes(",")) {
-      return Number(s.replace(/,/g, ""));
+    function isCartDomReady() {
+      return !!(
+        document.querySelector(".wc-block-cart") ||
+        document.querySelector(".wc-block-checkout") ||
+        document.querySelector(".wc-block-cart-items__row")
+      );
     }
 
-    // If only comma, treat as decimal separator
-    if (s.includes(",") && !s.includes(".")) {
-      return Number(s.replace(",", "."));
+    function getRowName(row) {
+      const a = row.querySelector(".wc-block-components-product-name");
+      return a ? (a.textContent || "").trim() : "";
     }
 
-    return Number(s);
-  }
+    function markRows() {
+      const rows = Array.from(document.querySelectorAll(".wc-block-cart-items__row"));
+      if (!rows.length) return;
 
-  function isBundleChildRow(row) {
-    const del = row.querySelector("del.wc-block-components-product-price__regular");
-    const ins = row.querySelector("ins.wc-block-components-product-price__value.is-discounted");
+      // Detect if kit parent exists in the cart UI
+      const hasKitParent = rows.some((r) => {
+        const name = getRowName(r);
+        return /Build Your Own Research Starter Kit/i.test(name) || /Build Your Own Research Advanced Kit/i.test(name);
+      });
 
-    const totalVal = row.querySelector(
-      ".wc-block-cart-item__total .wc-block-components-product-price__value"
-    );
+      if (!hasKitParent) {
+        // No kit in cart -> don't hide anything
+        rows.forEach((r) => r.classList.remove("kbp-child-item"));
+        return;
+      }
 
-    const insNum = moneyToNumber(ins?.textContent);
-    const totalNum = moneyToNumber(totalVal?.textContent);
+      rows.forEach((row) => {
+        const name = getRowName(row);
+        const isParent =
+          /Build Your Own Research Starter Kit/i.test(name) ||
+          /Build Your Own Research Advanced Kit/i.test(name);
 
-    // Your child items are discounted to zero and show a del+ins pair
-    return !!del && ins && insNum === 0 && totalNum === 0;
-  }
-
-  function markRows() {
-    document.querySelectorAll(".wc-block-cart-items__row").forEach((row) => {
-      const isChild = isBundleChildRow(row);
-      row.classList.toggle("kbp-child-item", isChild);
-    });
-  }
-
-  function start() {
-    // marker so you can confirm we reached "start"
-    document.documentElement.classList.add("kbp-cart-js-started");
-
-    markRows();
-
-    const obs = new MutationObserver(markRows);
-    obs.observe(document.documentElement, { childList: true, subtree: true });
-
-    setTimeout(markRows, 250);
-    setTimeout(markRows, 800);
-    setTimeout(markRows, 1500);
-  }
-
-  // Wait until blocks cart DOM exists
-  let tries = 0;
-  const timer = setInterval(() => {
-    tries++;
-    if (isCartDomReady()) {
-      clearInterval(timer);
-      start();
+        // Hide every non-parent row while kit exists
+        row.classList.toggle("kbp-child-item", !isParent);
+      });
     }
-    // stop trying after ~10 seconds
-    if (tries > 100) clearInterval(timer);
-  }, 100);
-})();
 
+    function start() {
+      document.documentElement.classList.add("kbp-cart-js-started");
+      markRows();
+
+      const obs = new MutationObserver(markRows);
+      obs.observe(document.documentElement, { childList: true, subtree: true });
+
+      setTimeout(markRows, 250);
+      setTimeout(markRows, 800);
+      setTimeout(markRows, 1500);
+    }
+
+    let tries = 0;
+    const timer = setInterval(() => {
+      tries++;
+      if (isCartDomReady()) {
+        clearInterval(timer);
+        start();
+      }
+      if (tries > 100) clearInterval(timer);
+    }, 100);
+  })();
 })();
