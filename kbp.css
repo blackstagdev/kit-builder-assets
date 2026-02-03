@@ -671,3 +671,19 @@
   box-shadow: 0 0 0 3px rgba(15, 79, 214, 0.18);
 }
 
+/* Shown under kit parent name in blocks cart */
+.kbp-water-note{
+  margin-top: 6px;
+  display: inline-flex;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #eef5ff;
+  border: 1px solid #cfe0ff;
+  color: #1f4aa8;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+
