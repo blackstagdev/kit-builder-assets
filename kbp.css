@@ -94,6 +94,12 @@
   flex-direction:column;
   gap:18px;
 }
+
+.kbp-sidebar{
+  width: 100%;
+}
+
+
 .kbp-sidebar .kbp-card{
   padding:18px;
 }
