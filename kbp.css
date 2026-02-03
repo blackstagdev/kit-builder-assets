@@ -600,3 +600,74 @@
     height: 34px;
   }
 }
+
+/* =========================
+   KBP Water Quantity Control
+========================= */
+
+.kbp-water-qty {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  border: 1px solid #d9e6ff;
+  background: #ffffff;
+  box-shadow: 0 2px 12px rgba(12, 24, 48, 0.06);
+}
+
+/* Buttons */
+.kbp-qty-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 12px;
+  background: #0f4fd6;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.08s ease, background 0.18s ease;
+}
+
+.kbp-qty-btn:hover {
+  background: #083bb0;
+}
+
+.kbp-qty-btn:active {
+  transform: scale(0.95);
+}
+
+/* Input */
+.kbp-qty-input {
+  width: 60px;
+  height: 40px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 900;
+  border-radius: 12px;
+  border: 1px solid #e0e6f5;
+  background: #f8fafc;
+  color: #0d1933;
+  outline: none;
+}
+
+/* Remove ugly number arrows */
+.kbp-qty-input::-webkit-inner-spin-button,
+.kbp-qty-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.kbp-qty-input {
+  -moz-appearance: textfield;
+}
+
+/* Focus glow */
+.kbp-qty-input:focus {
+  border-color: #0f4fd6;
+  box-shadow: 0 0 0 3px rgba(15, 79, 214, 0.18);
+}
+
