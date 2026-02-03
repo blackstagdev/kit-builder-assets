@@ -29,7 +29,6 @@
 
   // =========================
   // 1) KIT BUILDER PAGE LOGIC
-  // Only runs if #kbp-app exists AND KBP is present
   // =========================
   (function kitBuilder() {
     const root = document.getElementById("kbp-app");
@@ -39,12 +38,17 @@
     let kit = "starter";
     let selected = [];
 
-    const DISCOUNT = 0.10; // 10% off
+    // Water (default included qty=1)
+    const water = KBP.water || null;
+    let waterQty = 1;
+
+    // Discount
+    const DISCOUNT = Number(KBP.discountRate || 0.10);
 
     const maxForKit = () =>
       KBP.rules && KBP.rules[kit] ? Number(KBP.rules[kit]) : 0;
 
-    // Build a fast lookup map: id -> numeric price
+    // price lookup for vials
     const priceMap = new Map(
       (Array.isArray(KBP.products) ? KBP.products : []).map((p) => [
         Number(p.id),
@@ -56,8 +60,13 @@
       return selected.reduce((sum, id) => sum + (priceMap.get(Number(id)) || 0), 0);
     }
 
+    function waterSum() {
+      if (!water) return 0;
+      return Number(water.price || 0) * Number(waterQty || 1);
+    }
+
     function calcTotals() {
-      const sum = selectedSum();
+      const sum = selectedSum() + waterSum();
       const savings = sum * DISCOUNT;
       const total = sum - savings;
       return { sum, savings, total };
@@ -76,7 +85,7 @@
           <div class="kbp-hero">
             <span class="kbp-badge">Best Seller</span>
             <h1>Build Your Own Research Kit</h1>
-            <p>Choose your peptides • Bac water &amp; nasal spray included • Save up to 10%</p>
+            <p>Choose your peptides • Nasal spray included • Save ${Math.round(DISCOUNT * 100)}%</p>
           </div>
 
           <div class="kbp-container">
@@ -99,9 +108,9 @@
                     </div>
                     <div class="kbp-kit-price">
                       <span class="kbp-price" data-role="starter-price">${money(0)}</span>
-                      <span class="kbp-save" data-role="starter-save">10% off</span>
+                      <span class="kbp-save" data-role="starter-save">${Math.round(DISCOUNT * 100)}% off</span>
                     </div>
-                    <div class="kbp-kit-note">+ Bac water & nasal spray bottle</div>
+                    <div class="kbp-kit-note">+ Water (default) & nasal spray bottle</div>
                   </button>
 
                   <button type="button" class="kbp-kit" data-kit="advanced">
@@ -114,9 +123,9 @@
                     </div>
                     <div class="kbp-kit-price">
                       <span class="kbp-price" data-role="advanced-price">${money(0)}</span>
-                      <span class="kbp-save" data-role="advanced-save">10% off</span>
+                      <span class="kbp-save" data-role="advanced-save">${Math.round(DISCOUNT * 100)}% off</span>
                     </div>
-                    <div class="kbp-kit-note">+ Bac water & nasal spray bottle</div>
+                    <div class="kbp-kit-note">+ Water (default) & nasal spray bottle</div>
                   </button>
                 </div>
               </div>
@@ -131,8 +140,11 @@
                 </div>
 
                 <p class="kbp-desc">
-                  Choose peptide vials for your kit. Reconstitute with the included bac water.
+                  Choose peptide vials for your kit.
                 </p>
+
+                <!-- Water selector goes above products -->
+                <div id="kbp-water-box"></div>
 
                 <div class="kbp-products" id="kbp-products"></div>
                 <div class="kbp-msg" id="kbp-msg"></div>
@@ -177,7 +189,7 @@
                     <span class="kbp-strike" id="kbp-strike">${money(0)}</span>
                   </div>
                   <div class="kbp-row kbp-green">
-                    <span>Bundle Savings (10%)</span>
+                    <span>Bundle Savings (${Math.round(DISCOUNT * 100)}%)</span>
                     <span id="kbp-savings">-${money(0)}</span>
                   </div>
                   <div class="kbp-row kbp-total">
@@ -192,6 +204,61 @@
           </div>
         </div>
       `;
+    }
+
+    function renderWaterBox() {
+      const box = $("#kbp-water-box");
+      if (!box) return;
+
+      if (!water) {
+        box.innerHTML = `
+          <div class="kbp-msg">Water product not available.</div>
+        `;
+        return;
+      }
+
+      box.innerHTML = `
+        <div class="kbp-card" style="margin: 12px 0;">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap: 12px;">
+            <div>
+              <strong>${esc(water.name)}</strong>
+              <div style="opacity:.8; font-size: 13px;">Default included (you can add more)</div>
+              <div style="margin-top:6px;"><strong>${money(water.price)}</strong> each</div>
+            </div>
+
+            <div style="display:flex; align-items:center; gap: 8px;">
+              <button type="button" id="kbp-water-minus">−</button>
+              <input
+                type="number"
+                id="kbp-water-qty"
+                min="1"
+                value="${waterQty}"
+                style="width: 60px; text-align:center;"
+              />
+              <button type="button" id="kbp-water-plus">+</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      $("#kbp-water-minus").onclick = () => {
+        waterQty = Math.max(1, Number(waterQty) - 1);
+        updateUI();
+        renderWaterBox();
+      };
+
+      $("#kbp-water-plus").onclick = () => {
+        waterQty = Math.max(1, Number(waterQty) + 1);
+        updateUI();
+        renderWaterBox();
+      };
+
+      $("#kbp-water-qty").onchange = (e) => {
+        const v = Math.max(1, Number(e.target.value || 1));
+        waterQty = v;
+        updateUI();
+        renderWaterBox();
+      };
     }
 
     function paintKitUI() {
@@ -265,22 +332,19 @@
       if (savingsEl) savingsEl.textContent = "-" + money(savings);
       if (totalEl) totalEl.textContent = money(total);
 
-      // top kit card price (show the same "total" for the currently selected kit)
+      // top kit card price
       const starterPrice = $('[data-role="starter-price"]');
       const advPrice = $('[data-role="advanced-price"]');
-      const starterSave = $('[data-role="starter-save"]');
-      const advSave = $('[data-role="advanced-save"]');
 
-      // Show 0 until at least 1 item selected (optional)
-      const showValue = selected.length ? money(total) : money(0);
+      // show base kit price even before selecting vials (water included)
+      const baseTotal = water ? (water.price * waterQty) * (1 - DISCOUNT) : 0;
+      const showValue = (selected.length || waterQty) ? money(total || baseTotal) : money(0);
 
       if (kit === "starter") {
         if (starterPrice) starterPrice.textContent = showValue;
-        if (starterSave) starterSave.textContent = "10% off";
         if (advPrice) advPrice.textContent = money(0);
       } else {
         if (advPrice) advPrice.textContent = showValue;
-        if (advSave) advSave.textContent = "10% off";
         if (starterPrice) starterPrice.textContent = money(0);
       }
 
@@ -315,6 +379,7 @@
       setMsg("");
       paintKitUI();
       renderProducts();
+      renderWaterBox();
       updateUI();
     }
 
@@ -341,6 +406,7 @@
               nonce: KBP.nonce,
               kit,
               selected,
+              water_qty: waterQty,
             });
 
             if (!resp || !resp.success) {
@@ -361,6 +427,7 @@
     // INIT
     renderShell();
     paintKitUI();
+    renderWaterBox();
     renderProducts();
     updateUI();
     bindEvents();
