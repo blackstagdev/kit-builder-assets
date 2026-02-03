@@ -1,45 +1,21 @@
-/* =========================
-   KBP CART CHILD HIDING
-========================= */
-
-/* Hide child bundle rows completely */
-.kbp-child-item {
+.kbp-child-item .wc-block-cart-item__prices,
+.kbp-child-item .wc-block-cart-item__remove-link,
+.kbp-child-item .wc-block-components-sale-badge,
+.kbp-child-item .wc-block-cart-item__quantity,
+.kbp-child-item .wc-block-cart-item__total {
   display: none !important;
 }
 
-/* Water row stays visible but simplified */
-.kbp-water-item .wc-block-cart-item__prices,
-.kbp-water-item .wc-block-cart-item__remove-link,
-.kbp-water-item .wc-block-cart-item__quantity,
-.kbp-water-item .wc-block-cart-item__total,
-.kbp-water-item .wc-block-components-sale-badge {
-  display: none !important;
-}
-
-/* Water quantity label under product name */
-.kbp-water-qty {
-  margin-top: 4px;
-  font-size: 12px;
-  font-weight: 800;
-  color: #1f4aa8;
-  display: inline-flex;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: #eef5ff;
-  border: 1px solid #cfe0ff;
-}
-
-/* =========================
-   FORCE FULL WIDTH BUILDER
-========================= */
-
+/* Force full width even inside theme containers */
 #kbp-app,
 .kbp-page {
   width: 100% !important;
-  max-width: 1200px !important;
-  margin: 0 auto !important;
+  max-width: 1200px !important; /* adjust if you want wider */
+  margin-left: auto !important;
+  margin-right: auto !important;
 }
 
+/* If your theme limits entry content, this helps too */
 .entry-content #kbp-app,
 .entry-content .kbp-page,
 .woocommerce #kbp-app,
@@ -48,289 +24,762 @@
   max-width: 1200px !important;
 }
 
-/* =========================
-   BUILDER PAGE BASE
-========================= */
+/* Some themes set max-width on direct children */
+.entry-content > #kbp-app,
+.entry-content > .kbp-page {
+  max-width: 1200px !important;
+}
 
-.kbp-page {
-  background: #f6f7fb;
-  min-height: 100vh;
+.kbp-page{
+  background:#f6f7fb;
+  min-height:100vh;
 }
 
 /* HERO */
-.kbp-hero {
-  background: linear-gradient(90deg, #0b2b6b, #243a99);
-  color: #fff;
-  padding: 48px 16px 42px;
-  text-align: center;
+.kbp-hero{
+  background: linear-gradient(90deg,#0b2b6b,#243a99);
+  color:#fff;
+  padding:48px 16px 42px;
+  text-align:center;
+}
+.kbp-hero h1{
+  margin:10px 0 8px;
+  font-size:40px;
+  line-height:1.1;
+  letter-spacing:-.02em;
+}
+.kbp-hero p{
+  margin:0;
+  color:#cfe0ff;
+  font-size:16px;
+}
+.kbp-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:#f5c542;
+  color:#111;
+  font-weight:800;
+  font-size:11px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  padding:6px 10px;
+  border-radius:999px;
 }
 
-.kbp-hero h1 {
-  margin: 10px 0 8px;
-  font-size: 40px;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-}
-
-.kbp-hero p {
-  margin: 0;
-  color: #cfe0ff;
-  font-size: 16px;
-}
-
-.kbp-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #f5c542;
-  color: #111;
-  font-weight: 900;
-  font-size: 11px;
-  padding: 6px 10px;
-  border-radius: 999px;
-}
-
-/* =========================
-   LAYOUT
-========================= */
-
-.kbp-container {
+/* LAYOUT */
+.kbp-container{
   max-width: 1160px;
   margin: 0 auto;
   padding: 28px 16px 48px;
   display: flex;
-  gap: 1.75rem;
-  align-items: flex-start;
-}
-
-@media (max-width: 980px) {
-  .kbp-container {
-    flex-direction: column;
-  }
-}
-
-/* Main + Sidebar */
-.kbp-main {
-  flex: 1;
-  display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 1.75rem;
+  align-items:start;
+}
+@media (max-width: 980px){
+    flex-direction: row;
 }
 
-.kbp-sidebar {
+/* CARDS */
+.kbp-card{
+  background:#fff;
+  border:1px solid #e8ecf4;
+  border-radius:14px;
+  box-shadow: 0 1px 10px rgba(12, 24, 48, .06);
+  padding:18px;
+}
+.kbp-main{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+.kbp-sidebar{
   width: 100%;
 }
 
-@media (max-width: 980px) {
-  .kbp-sidebar {
-    width: 100%;
-  }
+.kbp-sidebar .kbp-card{
+  padding:18px;
 }
 
-/* =========================
-   CARDS
-========================= */
-
-.kbp-card {
-  background: #fff;
-  border: 1px solid #e8ecf4;
-  border-radius: 14px;
-  box-shadow: 0 1px 10px rgba(12, 24, 48, 0.06);
-  padding: 18px;
-}
-
-/* Sticky sidebar */
-.kbp-sticky {
+/* Sticky sidebar on desktop */
+.kbp-sticky{
   position: sticky;
   top: 16px;
 }
-
-@media (max-width: 980px) {
-  .kbp-sticky {
-    position: static;
-  }
+@media (max-width: 980px){
+  .kbp-sticky{ position: static; }
 }
 
-/* =========================
-   STEP HEADER
-========================= */
-
-.kbp-step-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
+/* Step header */
+.kbp-step-title{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:14px;
 }
-
-.kbp-step {
-  width: 28px;
-  height: 28px;
-  border-radius: 999px;
-  background: #0f4fd6;
-  color: #fff;
-  font-weight: 900;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.kbp-step-title h2{
+  margin:0;
+  font-size:18px;
+  font-weight:800;
+  color:#15223b;
 }
-
-.kbp-step-title h2 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 900;
-  color: #15223b;
+.kbp-step{
+  width:28px;
+  height:28px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:#0f4fd6;
+  color:#fff;
+  font-weight:900;
+  font-size:12px;
+}
+.kbp-step-row{
+  justify-content:space-between;
+}
+.kbp-step-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
 }
 
 /* Counter pill */
-.kbp-pill {
-  font-size: 12px;
-  font-weight: 900;
-  color: #5a647a;
-  background: #f2f4f9;
-  border: 1px solid #e7ebf5;
-  padding: 6px 10px;
-  border-radius: 999px;
+.kbp-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-size:12px;
+  font-weight:800;
+  color:#5a647a;
+  background:#f2f4f9;
+  border:1px solid #e7ebf5;
+  padding:6px 10px;
+  border-radius:999px;
+}
+
+/* DESCRIPTION */
+.kbp-desc{
+  margin: 0 0 14px;
+  color:#6b7488;
+  font-size:13px;
 }
 
 /* =========================
    KIT BUTTONS
-========================= */
-
-.kbp-kit-grid {
-  display: grid;
+   ========================= */
+.kbp-kit-grid{
+  display:grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
+  gap:14px;
+}
+@media (max-width: 640px){
+  .kbp-kit-grid{ grid-template-columns: 1fr; }
 }
 
-@media (max-width: 640px) {
-  .kbp-kit-grid {
-    grid-template-columns: 1fr;
-  }
+.kbp-kit{
+  appearance:none;
+  border:2px solid #e6ebf6;
+  background:#fff;
+  border-radius:12px;
+  padding:16px;
+  text-align:left;
+  cursor:pointer;
+  transition: transform .06s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+  position:relative;
+}
+.kbp-kit:hover{
+  border-color:#cddaf8;
+  box-shadow:0 6px 18px rgba(15,79,214,.08);
+}
+.kbp-kit:active{
+  transform: translateY(1px);
 }
 
-.kbp-kit {
-  border: 2px solid #e6ebf6;
-  border-radius: 12px;
-  padding: 16px;
-  cursor: pointer;
-  transition: 0.2s;
-  background: #fff;
+.kbp-kit.active{
+  border-color:#0f4fd6;
+  background:#eef5ff;
 }
 
-.kbp-kit:hover {
-  border-color: #cddaf8;
+.kbp-kit-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+}
+.kbp-kit h3{
+  margin:0;
+  font-size:15px;
+  font-weight:900;
+  color:#13203a;
+}
+.kbp-kit p{
+  margin:6px 0 0;
+  font-size:12px;
+  color:#667089;
 }
 
-.kbp-kit.active {
-  border-color: #0f4fd6;
-  background: #eef5ff;
+.kbp-selected-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:#0f4fd6;
+  color:#fff;
+  font-weight:800;
+  font-size:11px;
+  padding:4px 8px;
+  border-radius:8px;
+  line-height:1;
+  white-space:nowrap;
 }
 
-.kbp-kit-price {
-  margin-top: 12px;
-  display: flex;
-  gap: 10px;
-  align-items: baseline;
+.kbp-best{
+  position:absolute;
+  top:-10px;
+  right:10px;
+  background:#ff7a1a;
+  color:#fff;
+  font-weight:900;
+  font-size:11px;
+  padding:4px 9px;
+  border-radius:999px;
+  box-shadow:0 6px 14px rgba(255,122,26,.22);
 }
 
-.kbp-price {
-  font-size: 22px;
-  font-weight: 950;
+.kbp-kit-price{
+  margin-top:12px;
+  display:flex;
+  align-items:baseline;
+  gap:10px;
 }
-
-.kbp-save {
-  font-size: 12px;
-  font-weight: 900;
-  color: #1f8a4c;
+.kbp-kit-price .kbp-price{
+  font-size:22px;
+  font-weight:950;
+  color:#0d1933;
+}
+.kbp-kit-price .kbp-save{
+  font-size:12px;
+  font-weight:800;
+  color:#1f8a4c;
+}
+.kbp-kit-note{
+  margin-top:10px;
+  font-size:11px;
+  color:#7a8397;
 }
 
 /* =========================
    PRODUCTS GRID
-========================= */
-
-.kbp-products {
-  display: grid;
+   ========================= */
+.kbp-products{
+  display:grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap:12px;
+}
+@media (max-width: 640px){
+  .kbp-products{ grid-template-columns: 1fr; }
 }
 
-@media (max-width: 640px) {
-  .kbp-products {
-    grid-template-columns: 1fr;
-  }
+.kbp-item{
+  appearance:none;
+  border:2px solid #e6ebf6;
+  background:#fff;
+  border-radius:12px;
+  padding:14px;
+  text-align:left;
+  cursor:pointer;
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  transition: border-color .18s ease, background .18s ease, box-shadow .18s ease, transform .06s ease;
+}
+.kbp-item:hover{
+  border-color:#cddaf8;
+  background:#fbfcff;
+}
+.kbp-item:active{ transform: translateY(1px); }
+
+.kbp-item.on{
+  border-color:#0f4fd6;
+  background:#eef5ff;
+}
+.kbp-item:disabled{
+  cursor:not-allowed;
+  opacity:.55;
 }
 
-.kbp-item {
-  border: 2px solid #e6ebf6;
-  border-radius: 12px;
-  padding: 14px;
-  cursor: pointer;
-  display: flex;
-  gap: 12px;
-  transition: 0.2s;
+.kbp-box{
+  width:18px;
+  height:18px;
+  border-radius:4px;
+  border:2px solid #c7cede;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+  font-size:12px;
+  color:#fff;
+  background:transparent;
+  flex:0 0 auto;
+  margin-top:2px;
+}
+.kbp-item.on .kbp-box{
+  border-color:#0f4fd6;
+  background:#0f4fd6;
 }
 
-.kbp-item:hover {
-  border-color: #cddaf8;
+.kbp-item-body{ min-width:0; }
+.kbp-name{
+  font-size:14px;
+  font-weight:900;
+  color:#121f39;
+  line-height:1.15;
+}
+.kbp-meta{
+  margin-top:5px;
+  font-size:12px;
+  color:#6b7488;
 }
 
-.kbp-item.on {
-  border-color: #0f4fd6;
-  background: #eef5ff;
-}
-
-.kbp-box {
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
-  border: 2px solid #c7cede;
-}
-
-.kbp-item.on .kbp-box {
-  background: #0f4fd6;
-  border-color: #0f4fd6;
+/* messages */
+.kbp-msg{
+  margin-top:12px;
+  font-weight:800;
+  color:#b00020;
+  min-height:18px;
 }
 
 /* =========================
-   SIDEBAR TOTALS
+   SIDEBAR / INCLUDES
+   ========================= */
+.kbp-sidebar h3{
+  margin:0 0 12px;
+  font-size:16px;
+  font-weight:900;
+  color:#14213b;
+}
+
+.kbp-includes{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-bottom:12px;
+}
+.kbp-inc{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px;
+  border-radius:10px;
+  background:#f5f7fb;
+  border:1px solid #eef2fb;
+}
+.kbp-inc-ico{
+  width:34px;
+  height:34px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#dde8ff;
+  font-size:16px;
+}
+.kbp-inc-txt strong{
+  display:block;
+  font-size:13px;
+  color:#182746;
+  font-weight:900;
+}
+.kbp-inc-txt small{
+  display:block;
+  font-size:11px;
+  color:#6b7488;
+  margin-top:2px;
+}
+
+/* Freebies (green) */
+.kbp-free{
+  background:#ecfbf2;
+  border:1px solid #bfe9cf;
+}
+.kbp-free .kbp-inc-ico{
+  background:#d7f3e4;
+}
+.kbp-check{
+  margin-left:auto;
+  font-weight:1000;
+  color:#1f8a4c;
+  font-size:16px;
+}
+
+/* Tip */
+.kbp-tip{
+  margin: 10px 0 14px;
+  padding:10px 12px;
+  background:#eef5ff;
+  border:1px solid #cfe0ff;
+  color:#1f4aa8;
+  font-size:12px;
+  border-radius:10px;
+  font-weight:700;
+}
+
+/* Totals */
+.kbp-total-box{
+  border-top:1px solid #eef2fb;
+  padding-top:12px;
+  margin-top:10px;
+}
+.kbp-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  font-size:12px;
+  color:#6b7488;
+  margin-bottom:8px;
+}
+.kbp-strike{
+  text-decoration:line-through;
+  color:#8c95aa;
+}
+.kbp-green{
+  color:#1f8a4c;
+  font-weight:800;
+}
+.kbp-total{
+  font-size:16px;
+  color:#0d1933;
+  font-weight:1000;
+  margin-top:6px;
+}
+
+/* Add button */
+.kbp-add{
+  width:100%;
+  margin-top:14px;
+  border:none;
+  border-radius:12px;
+  padding:14px 12px;
+  font-weight:950;
+  font-size:14px;
+  cursor:pointer;
+  transition: transform .06s ease, opacity .18s ease, background .18s ease;
+  background:#0f4fd6;
+  color:#fff;
+}
+.kbp-add:active{ transform: translateY(1px); }
+.kbp-add:disabled{
+  background:#cfd6e6;
+  color:#ffffff;
+  cursor:not-allowed;
+}
+
+/* Icons grid */
+.kbp-icons{
+  margin-top:16px;
+  padding-top:14px;
+  border-top:1px solid #eef2fb;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:10px 12px;
+}
+.kbp-icons > div{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  justify-content:center;
+  text-align:center;
+  color:#6b7488;
+}
+.kbp-icons span{
+  font-size:16px;
+}
+.kbp-icons small{
+  font-size:11px;
+  font-weight:700;
+}
+
+/* Small polish */
+.kbp-kit:focus,
+.kbp-item:focus,
+.kbp-add:focus{
+  outline:none;
+  box-shadow:0 0 0 3px rgba(15,79,214,.18);
+}
+
+/* =========================
+   KBP: SHOW WATER ROW + IMPROVE QUANTITY UI (Product ID 524)
+   Works with Woo Blocks cart/checkout
 ========================= */
 
-.kbp-total-box {
-  border-top: 1px solid #eef2fb;
-  padding-top: 12px;
+/* 1) Make sure the water row stays visible even if something accidentally adds kbp-child-item */
+.wc-block-cart-items__row:has(a[href*="add-to-cart=524"]) {
+  display: flex !important;
+}
+
+/* 2) Improve layout for the water row */
+.wc-block-cart-items__row:has(a[href*="add-to-cart=524"]) .wc-block-cart-item__wrap {
+  background: #f7fbff;
+  border: 1px solid #cfe0ff;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+/* 3) Make name + meta align nicer */
+.wc-block-cart-items__row:has(a[href*="add-to-cart=524"]) .wc-block-components-product-name {
+  font-weight: 900;
+  color: #0d1933;
+}
+
+.wc-block-cart-items__row:has(a[href*="add-to-cart=524"]) .wc-block-cart-item__quantity {
+  display: flex !important;          /* ensure visible */
+  justify-content: flex-start;
   margin-top: 10px;
 }
 
-.kbp-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  margin-bottom: 8px;
+/* 4) Bigger, cleaner quantity control */
+.wc-block-cart-items__row:has(a[href*="add-to-cart=524"])
+  .wc-block-components-quantity-selector {
+  border: 1px solid #d9e6ff;
+  border-radius: 12px;
+  padding: 6px;
+  background: #fff;
+  box-shadow: 0 1px 10px rgba(12, 24, 48, .06);
 }
 
-.kbp-total {
-  font-size: 16px;
-  font-weight: 1000;
+/* Make +/- buttons feel nicer */
+.wc-block-cart-items__row:has(a[href*="add-to-cart=524"])
+  .wc-block-components-quantity-selector__button {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  font-weight: 900;
+}
+
+/* Make the number input bigger */
+.wc-block-cart-items__row:has(a[href*="add-to-cart=524"])
+  .wc-block-components-quantity-selector__input {
+  width: 54px;
+  height: 38px;
+  font-weight: 900;
+  border-radius: 10px;
+}
+
+/* 5) Optional: show a small label above quantity */
+.wc-block-cart-items__row:has(a[href*="add-to-cart=524"])
+  .wc-block-cart-item__quantity::before {
+  content: "Water Quantity";
+  display: block;
+  font-size: 12px;
+  font-weight: 900;
+  color: #1f4aa8;
+  margin-bottom: 6px;
+}
+
+/* 6) Keep price/total readable for the water row (since you want it visible) */
+.wc-block-cart-items__row:has(a[href*="add-to-cart=524"])
+  .wc-block-cart-item__prices,
+.wc-block-cart-items__row:has(a[href*="add-to-cart=524"])
+  .wc-block-cart-item__total {
+  display: block !important;
+}
+
+/* 7) Responsive polish */
+@media (max-width: 640px) {
+  .wc-block-cart-items__row:has(a[href*="add-to-cart=524"]) .wc-block-cart-item__wrap {
+    padding: 10px;
+  }
+
+  .wc-block-cart-items__row:has(a[href*="add-to-cart=524"])
+    .wc-block-components-quantity-selector__button {
+    width: 34px;
+    height: 34px;
+  }
+
+  .wc-block-cart-items__row:has(a[href*="add-to-cart=524"])
+    .wc-block-components-quantity-selector__input {
+    width: 46px;
+    height: 34px;
+  }
 }
 
 /* =========================
-   ADD BUTTON
+   KBP Water Quantity Control
 ========================= */
 
-.kbp-add {
-  width: 100%;
-  margin-top: 14px;
-  border: none;
-  border-radius: 12px;
-  padding: 14px;
-  font-weight: 950;
-  background: #0f4fd6;
-  color: #fff;
-  cursor: pointer;
+.kbp-water-qty {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  border: 1px solid #d9e6ff;
+  background: #ffffff;
+  box-shadow: 0 2px 12px rgba(12, 24, 48, 0.06);
 }
 
-.kbp-add:disabled {
-  background: #cfd6e6;
-  cursor: not-allowed;
+/* Buttons */
+.kbp-qty-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 12px;
+  background: #0f4fd6;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.08s ease, background 0.18s ease;
+}
+
+.kbp-qty-btn:hover {
+  background: #083bb0;
+}
+
+.kbp-qty-btn:active {
+  transform: scale(0.95);
+}
+
+/* Input */
+.kbp-qty-input {
+  width: 60px;
+  height: 40px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 900;
+  border-radius: 12px;
+  border: 1px solid #e0e6f5;
+  background: #f8fafc;
+  color: #0d1933;
+  outline: none;
+}
+
+/* Remove ugly number arrows */
+.kbp-qty-input::-webkit-inner-spin-button,
+.kbp-qty-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.kbp-qty-input {
+  -moz-appearance: textfield;
+}
+
+/* Focus glow */
+.kbp-qty-input:focus {
+  border-color: #0f4fd6;
+  box-shadow: 0 0 0 3px rgba(15, 79, 214, 0.18);
+}
+
+/* Shown under kit parent name in blocks cart */
+.kbp-water-note{
+  margin-top: 6px;
+  display: inline-flex;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #eef5ff;
+  border: 1px solid #cfe0ff;
+  color: #1f4aa8;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* ===================================================================
+   KBP PATCH (SAFE OVERRIDES)
+   - Keeps your CSS above intact
+   - Fixes duplicates/conflicts
+   - Works with the NEW JS (adds .kbp-water-item + .kbp-water-qty)
+=================================================================== */
+
+/* 0) The container media query above is backwards (column->row).
+      Don't delete it; override it safely here. */
+@media (max-width: 980px){
+  .kbp-container{
+    flex-direction: column;
+  }
+}
+
+/* 1) If you ever decide to fully hide kit children, you can uncomment:
+.kbp-child-item { display:none !important; }
+   For now we keep your original behavior (hide sub-elements only). */
+
+/* 2) Ensure KBP child hiding applies to mini-cart rows too (same markup). */
+.wc-block-mini-cart__drawer .kbp-child-item .wc-block-cart-item__prices,
+.wc-block-mini-cart__drawer .kbp-child-item .wc-block-cart-item__remove-link,
+.wc-block-mini-cart__drawer .kbp-child-item .wc-block-components-sale-badge,
+.wc-block-mini-cart__drawer .kbp-child-item .wc-block-cart-item__quantity,
+.wc-block-mini-cart__drawer .kbp-child-item .wc-block-cart-item__total{
+  display:none !important;
+}
+
+/* 3) WATER row: rely on JS class (more reliable than :has/add-to-cart selectors) */
+.kbp-water-item .wc-block-cart-item__wrap{
+  background:#f7fbff;
+  border:1px solid #cfe0ff;
+  border-radius:12px;
+  padding:12px;
+}
+
+.kbp-water-item a.wc-block-components-product-name,
+.kbp-water-item .wc-block-components-product-name{
+  font-weight:900;
+  color:#0d1933;
+}
+
+/* 4) The Qty pill injected by JS (under the name link) */
+.kbp-water-qty{
+  margin-top:6px;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 10px;
+  border-radius:999px;
+  background:#eef5ff;
+  border:1px solid #cfe0ff;
+  color:#1f4aa8;
+  font-size:12px;
+  font-weight:900;
+  line-height:1;
+}
+
+/* 5) For WATER row in CART + MINI CART:
+      Hide price/total/remove/quantity controls, keep only the name + qty badge.
+      (This matches your screenshot goal.) */
+.kbp-water-item .wc-block-cart-item__prices,
+.kbp-water-item .wc-block-components-sale-badge,
+.kbp-water-item .wc-block-cart-item__quantity,
+.kbp-water-item .wc-block-cart-item__total,
+.kbp-water-item .wc-block-cart-item__remove-link{
+  display:none !important;
+}
+
+.wc-block-mini-cart__drawer .kbp-water-item .wc-block-cart-item__prices,
+.wc-block-mini-cart__drawer .kbp-water-item .wc-block-components-sale-badge,
+.wc-block-mini-cart__drawer .kbp-water-item .wc-block-cart-item__quantity,
+.wc-block-mini-cart__drawer .kbp-water-item .wc-block-cart-item__total,
+.wc-block-mini-cart__drawer .kbp-water-item .wc-block-cart-item__remove-link{
+  display:none !important;
+}
+
+/* 6) Safety: If any older rule accidentally marks water as child, keep the badge visible */
+.kbp-child-item.kbp-water-item .kbp-water-qty{
+  display:inline-flex !important;
+}
+
+/* 7) Optional: tighten spacing for water row so it looks like a clean "included" line item */
+.kbp-water-item .wc-block-cart-item__wrap{
+  padding-bottom:10px;
+}
+
+@media (max-width: 640px){
+  .kbp-water-item .wc-block-cart-item__wrap{
+    padding:10px;
+  }
 }
