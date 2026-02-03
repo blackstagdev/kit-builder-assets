@@ -504,3 +504,99 @@
   outline:none;
   box-shadow:0 0 0 3px rgba(15,79,214,.18);
 }
+
+/* =========================
+   KBP: SHOW WATER ROW + IMPROVE QUANTITY UI (Product ID 524)
+   Works with Woo Blocks cart/checkout
+========================= */
+
+/* 1) Make sure the water row stays visible even if something accidentally adds kbp-child-item */
+.wc-block-cart-items__row:has(a[href*="add-to-cart=524"]) {
+  display: flex !important;
+}
+
+/* 2) Improve layout for the water row */
+.wc-block-cart-items__row:has(a[href*="add-to-cart=524"]) .wc-block-cart-item__wrap {
+  background: #f7fbff;
+  border: 1px solid #cfe0ff;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+/* 3) Make name + meta align nicer */
+.wc-block-cart-items__row:has(a[href*="add-to-cart=524"]) .wc-block-components-product-name {
+  font-weight: 900;
+  color: #0d1933;
+}
+
+.wc-block-cart-items__row:has(a[href*="add-to-cart=524"]) .wc-block-cart-item__quantity {
+  display: flex !important;          /* ensure visible */
+  justify-content: flex-start;
+  margin-top: 10px;
+}
+
+/* 4) Bigger, cleaner quantity control */
+.wc-block-cart-items__row:has(a[href*="add-to-cart=524"])
+  .wc-block-components-quantity-selector {
+  border: 1px solid #d9e6ff;
+  border-radius: 12px;
+  padding: 6px;
+  background: #fff;
+  box-shadow: 0 1px 10px rgba(12, 24, 48, .06);
+}
+
+/* Make +/- buttons feel nicer */
+.wc-block-cart-items__row:has(a[href*="add-to-cart=524"])
+  .wc-block-components-quantity-selector__button {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  font-weight: 900;
+}
+
+/* Make the number input bigger */
+.wc-block-cart-items__row:has(a[href*="add-to-cart=524"])
+  .wc-block-components-quantity-selector__input {
+  width: 54px;
+  height: 38px;
+  font-weight: 900;
+  border-radius: 10px;
+}
+
+/* 5) Optional: show a small label above quantity */
+.wc-block-cart-items__row:has(a[href*="add-to-cart=524"])
+  .wc-block-cart-item__quantity::before {
+  content: "Water Quantity";
+  display: block;
+  font-size: 12px;
+  font-weight: 900;
+  color: #1f4aa8;
+  margin-bottom: 6px;
+}
+
+/* 6) Keep price/total readable for the water row (since you want it visible) */
+.wc-block-cart-items__row:has(a[href*="add-to-cart=524"])
+  .wc-block-cart-item__prices,
+.wc-block-cart-items__row:has(a[href*="add-to-cart=524"])
+  .wc-block-cart-item__total {
+  display: block !important;
+}
+
+/* 7) Responsive polish */
+@media (max-width: 640px) {
+  .wc-block-cart-items__row:has(a[href*="add-to-cart=524"]) .wc-block-cart-item__wrap {
+    padding: 10px;
+  }
+
+  .wc-block-cart-items__row:has(a[href*="add-to-cart=524"])
+    .wc-block-components-quantity-selector__button {
+    width: 34px;
+    height: 34px;
+  }
+
+  .wc-block-cart-items__row:has(a[href*="add-to-cart=524"])
+    .wc-block-components-quantity-selector__input {
+    width: 46px;
+    height: 34px;
+  }
+}
