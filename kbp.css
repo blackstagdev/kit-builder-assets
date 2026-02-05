@@ -71,13 +71,15 @@
   max-width: 1160px;
   margin: 0 auto;
   padding: 28px 16px 48px;
-  display: flex;
-  flex-direction: column;
-  gap: 1.75rem;
-  align-items:start;
+display:block;
+
 }
 @media (max-width: 980px){
-    flex-direction: row;
+  display: flex;
+  flex-direction: column;
+    gap: 1.75rem;
+  align-items:start;
+  
 }
 
 /* CARDS */
