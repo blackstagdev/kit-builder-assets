@@ -10,9 +10,7 @@
 #kbp-app,
 .kbp-page {
   width: 100% !important;
-  max-width: 1200px !important; /* adjust if you want wider */
-  margin-left: auto !important;
-  margin-right: auto !important;
+  max-width: 100% !important; /* adjust if you want wider */
 }
 
 /* If your theme limits entry content, this helps too */
@@ -21,13 +19,13 @@
 .woocommerce #kbp-app,
 .woocommerce .kbp-page {
   width: 100% !important;
-  max-width: 1200px !important;
+  max-width: 100% !important;
 }
 
 /* Some themes set max-width on direct children */
 .entry-content > #kbp-app,
 .entry-content > .kbp-page {
-  max-width: 1200px !important;
+  max-width: 100% !important;
 }
 
 .kbp-page{
@@ -36,7 +34,8 @@
 
 /* HERO */
 .kbp-hero{
-  background: linear-gradient(90deg,#0b2b6b,#243a99);
+  /* background: linear-gradient(90deg,#0b2b6b,#243a99)*/
+  background: url("https://paramountpeptides.com/wp-content/uploads/2026/02/1-1.png");
   color:#fff;
   padding:48px 16px 42px;
   text-align:center;
