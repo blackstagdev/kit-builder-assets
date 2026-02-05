@@ -34,11 +34,12 @@
 
 /* HERO */
 .kbp-hero{
-  /* background: linear-gradient(90deg,#0b2b6b,#243a99)*/
+  /* background: linear-gradient(90deg,#0b2b6b,#243a99)
   background: url("https://paramountpeptides.com/wp-content/uploads/2026/02/1-1.png");
   color:#fff;
   padding:48px 16px 42px;
-  text-align:center;
+  text-align:center;*/
+  margin-bottom:1.75rem;
 }
 .kbp-hero h1{
   margin:10px 0 8px;
