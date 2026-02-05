@@ -83,9 +83,6 @@
       root.innerHTML = `
         <div class="kbp-page">
           <div class="kbp-hero">
-            // <span class="kbp-badge">Best Seller</span>
-            // <h1>Build Your Own Research Kit</h1>
-            // <p>Choose your peptides • Nasal spray included • Save ${Math.round(DISCOUNT * 100)}%</p>
             <img src="https://paramountpeptides.com/wp-content/uploads/2026/02/1-1.png
                 " style="
     height: 100%;
