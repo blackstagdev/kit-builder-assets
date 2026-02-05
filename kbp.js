@@ -221,14 +221,14 @@
 
       box.innerHTML = `
         <div class="kbp-card" style="margin: 12px 0;">
-          <div style="display:flex; align-items:center; justify-content:space-between; gap: 12px;">
+          <div class="water-quantity-style" >
             <div>
               <strong>${esc(water.name)}</strong>
               <div style="opacity:.8; font-size: 13px;">Default included (you can add more)</div>
               <div style="margin-top:6px;"><strong>${money(water.price)}</strong> each</div>
             </div>
 
-            <div style="display:flex; align-items:center; gap: 8px;">
+            <div  style="display:flex; align-items:center; gap: 8px;">
               <button type="button" id="kbp-water-minus" class="kbp-qty-btn">−</button>
               <input
                  type="number"
