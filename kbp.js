@@ -83,7 +83,7 @@
       root.innerHTML = `
         <div class="kbp-page">
           <div class="kbp-hero">
-            <img src="https://paramountpeptides.com/wp-content/uploads/2026/02/1-1.png
+            <img src="https://paramountpeptides.com/wp-content/uploads/2026/02/Build-you-own-Kit2.jpg
                 " style="
     height: 100%;
     width: 100%;
