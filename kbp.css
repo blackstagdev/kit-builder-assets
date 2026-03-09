@@ -647,6 +647,22 @@
   transition: transform 0.08s ease, background 0.18s ease;
 }
 
+.kbp-qty-btn-vials {
+  width: 25px;
+  height: 25px;
+  border: none;
+  border-radius: 10px;
+  background: #0f4fd6;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.08s ease, background 0.18s ease;
+}
+
 .kbp-qty-btn:hover {
   background: #083bb0;
 }
@@ -661,6 +677,19 @@
   height: 40px;
   text-align: center;
   font-size: 15px;
+  font-weight: 900;
+  border-radius: 12px;
+  border: 1px solid #e0e6f5;
+  background: #f8fafc;
+  color: #0d1933;
+  outline: none;
+}
+
+.kbp-qty-input-vials {
+  width: 50px;
+  height: 25px;
+  text-align: center;
+  font-size: 16px;
   font-weight: 900;
   border-radius: 12px;
   border: 1px solid #e0e6f5;
