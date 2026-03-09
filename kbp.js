@@ -38,6 +38,20 @@
     let kit = "starter";
     let selected = [];
 
+    function qtyFor(pid) {
+  return selected.filter((x) => Number(x) === Number(pid)).length;
+}
+
+function addUnit(pid) {
+  if (selected.length >= maxForKit()) return;
+  selected.push(Number(pid));
+}
+
+function removeUnit(pid) {
+  const index = selected.findIndex((x) => Number(x) === Number(pid));
+  if (index !== -1) selected.splice(index, 1);
+}
+
     // Water (default included qty=1)
     const water = KBP.water || null;
     let waterQty = 1;
@@ -57,8 +71,10 @@
     );
 
     function selectedSum() {
-      return selected.reduce((sum, id) => sum + (priceMap.get(Number(id)) || 0), 0);
-    }
+  return selected.reduce((sum, id) => {
+    return sum + (priceMap.get(Number(id)) || 0);
+  }, 0);
+}
 
     function waterSum() {
       if (!water) return 0;
@@ -278,53 +294,69 @@
       if (vialCount) vialCount.textContent = String(maxForKit());
     }
 
-    function renderProducts() {
-      const wrap = $("#kbp-products");
-      if (!wrap) return;
+function renderProducts() {
+  const wrap = $("#kbp-products");
+  if (!wrap) return;
 
-      const max = maxForKit();
-      wrap.innerHTML = "";
+  const max = maxForKit();
+  wrap.innerHTML = "";
 
-      (KBP.products || []).forEach((p) => {
-        const pid = Number(p.id);
-        const checked = selected.includes(pid);
-        const disabled = !checked && selected.length >= max;
+  (KBP.products || []).forEach((p) => {
+    const pid = Number(p.id);
+    const qty = qtyFor(pid);
+    const canAddMore = selected.length < max;
 
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "kbp-item" + (checked ? " on" : "");
-        btn.disabled = !!disabled;
+    const card = document.createElement("div");
+    card.className = "kbp-item" + (qty > 0 ? " on" : "");
 
-        btn.innerHTML = `
-          <span class="kbp-box">${checked ? "✓" : ""}</span>
-          <div class="kbp-item-body">
-            <div class="kbp-name">${esc(p.name)}</div>
-            <div class="kbp-meta">
-              ${p.sku ? "SKU: " + esc(p.sku) : ""}
-              ${typeof p.price !== "undefined" ? ` • <strong>${esc(money(p.price))}</strong>` : ""}
-            </div>
-          </div>
-        `;
+    card.innerHTML = `
+      <span class="kbp-box">${qty > 0 ? "✓" : ""}</span>
+      <div class="kbp-item-body" style="flex:1;">
+        <div class="kbp-name">${esc(p.name)}</div>
+        <div class="kbp-meta">
+          ${p.sku ? "SKU: " + esc(p.sku) : ""}
+          ${typeof p.price !== "undefined" ? ` • <strong>${esc(money(p.price))}</strong>` : ""}
+        </div>
 
-        btn.addEventListener("click", () => {
-          if (checked) selected = selected.filter((x) => x !== pid);
-          else if (selected.length < max) selected.push(pid);
+        <div class="kbp-product-qty" style="margin-top:10px; display:flex; align-items:center; gap:8px;">
+          <button type="button" class="kbp-qty-btn kbp-minus" ${qty <= 0 ? "disabled" : ""}>−</button>
+          <input type="number" class="kbp-qty-input" value="${qty}" min="0" max="${max}" readonly>
+          <button type="button" class="kbp-qty-btn kbp-plus" ${!canAddMore ? "disabled" : ""}>+</button>
+        </div>
+      </div>
+    `;
 
-          setMsg("");
-          renderProducts();
-          updateUI();
-        });
+    const minusBtn = card.querySelector(".kbp-minus");
+    const plusBtn = card.querySelector(".kbp-plus");
 
-        wrap.appendChild(btn);
+    if (minusBtn) {
+      minusBtn.addEventListener("click", () => {
+        removeUnit(pid);
+        setMsg("");
+        renderProducts();
+        updateUI();
       });
     }
+
+    if (plusBtn) {
+      plusBtn.addEventListener("click", () => {
+        addUnit(pid);
+        setMsg("");
+        renderProducts();
+        updateUI();
+      });
+    }
+
+    wrap.appendChild(card);
+  });
+}
 
     function updateUI() {
       const max = maxForKit();
       const { sum, savings, total } = calcTotals();
 
       const counter = $("#kbp-counter");
-      if (counter) counter.textContent = `${selected.length} / ${max} selected`;
+      if (counter) counter.textContent = `${selected.length} / ${max} vials selected`;
 
       // sidebar totals
       const strikeEl = $("#kbp-strike");
@@ -355,7 +387,7 @@
       if (addBtn) {
         const remaining = max - selected.length;
         addBtn.disabled = remaining !== 0;
-        addBtn.textContent = remaining > 0 ? `Select ${remaining} more peptides` : "Add to cart";
+        addBtn.textContent = remaining > 0 ? `Select ${remaining} more vial${remaining > 1 ? "s" : ""}` : "Add to cart";
       }
     }
 
