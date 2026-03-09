@@ -311,17 +311,19 @@ function renderProducts() {
 
     card.innerHTML = `
       <span class="kbp-box">${qty > 0 ? "✓" : ""}</span>
-      <div class="kbp-item-body" style="flex:1;">
+      <div class="kbp-item-body" style="flex:1;display: flex;justify-content: space-between;">
+      <div>
         <div class="kbp-name">${esc(p.name)}</div>
         <div class="kbp-meta">
           ${p.sku ? "SKU: " + esc(p.sku) : ""}
           ${typeof p.price !== "undefined" ? ` • <strong>${esc(money(p.price))}</strong>` : ""}
         </div>
+        </div>
 
         <div class="kbp-product-qty" style="margin-top:10px; display:flex; align-items:center; gap:8px;">
-          <button type="button" class="kbp-qty-btn kbp-minus" ${qty <= 0 ? "disabled" : ""}>−</button>
+          <button type="button" class="kbp-qty-btn-vials kbp-qty-btn kbp-minus" ${qty <= 0 ? "disabled" : ""}>−</button>
           <input type="number" class="kbp-qty-input" value="${qty}" min="0" max="${max}" readonly>
-          <button type="button" class="kbp-qty-btn kbp-plus" ${!canAddMore ? "disabled" : ""}>+</button>
+          <button type="button" class="kbp-qty-btn-vials kbp-qty-btn kbp-plus" ${!canAddMore ? "disabled" : ""}>+</button>
         </div>
       </div>
     `;
