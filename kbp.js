@@ -322,7 +322,7 @@ function renderProducts() {
 
         <div class="kbp-product-qty" style="margin-top:10px; display:flex; align-items:center; gap:8px;">
           <button type="button" class="kbp-qty-btn-vials kbp-qty-btn kbp-minus" ${qty <= 0 ? "disabled" : ""}>−</button>
-          <input type="number" class="kbp-qty-input" value="${qty}" min="0" max="${max}" readonly>
+          <input type="number" class="kbp-qty-input-vials" value="${qty}" min="0" max="${max}" readonly>
           <button type="button" class="kbp-qty-btn-vials kbp-qty-btn kbp-plus" ${!canAddMore ? "disabled" : ""}>+</button>
         </div>
       </div>
